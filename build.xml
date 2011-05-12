@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+Usage example:
+    ant -Dplay.path=<play path> auto-test
+
+Or with PLAY_PATH environment variable:
+    ant auto-test
+-->
+<project name="Meridian" basedir=".">
+
+    <property name="play.default.path" value="/opt/play-1.2.1"/>
+    <property environment="env"/>
+    <condition property="play.path" value="${env.PLAY_PATH}">
+        <isset property="env.PLAY_PATH"/>
+    </condition>
+    <property name="play.path" value="${play.default.path}"/>
+
+    <property name="play.antify.path" value="${play.path}/modules/antify-1.0"/>
+    <property name="test.start.delay" value="5"/>
+    <import file="${play.antify.path}/application-build.xml"/>
+
+</project>
