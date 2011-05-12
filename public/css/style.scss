@@ -1,0 +1,205 @@
+/* Dull * /
+$black: #333322;
+$brown: #887766;
+$white: #ffffff;
+$gray: #dddddd;
+$blue: #77aadd;
+*/
+
+
+/* Vibrant */
+$black: #333322;
+$brown: #887766;
+$white: #ffffff;
+$gray: #dddddd;
+$blue: #77aadd;
+$darkgray: #999;
+$offwhite: #fffffc;
+$lightblue: #d5ecfa;
+
+@mixin pie {
+  behavior: url(/public/css/PIE.htc);
+}
+
+@mixin shadow($color, $x, $y, $blur) {
+  -webkit-box-shadow: $color $x $y $blur;
+  -moz-box-shadow: $color $x $y $blur;
+  box-shadow: $color $x $y $blur;
+  @include pie;
+}
+
+@mixin simple-gradient($colorTop, $colorBottom) {
+  background: -webkit-gradient(linear, 0 0, 0 bottom, from($colorTop), to($colorBottom));
+  background: -moz-linear-gradient($colorTop, $colorBottom);
+  background: linear-gradient($colorTop, $colorBottom);
+  -pie-background: linear-gradient($colorTop, $colorBottom);
+  @include pie;
+}
+
+@mixin rounded-corners($radius) {
+  -webkit-border-radius: $radius;
+  -moz-border-radius: $radius;
+  border-radius: $radius;
+  @include pie;
+}
+
+
+* {
+    color: $black;
+}
+
+
+html {
+  background-color: $offwhite;
+}
+
+#main {
+  min-height: 40em;
+  height: auto;
+}
+
+.ie6 #main, .ie7 #main, .ie8 #main {
+  height: 40em;
+}
+
+#doc2 {
+  position: relative;
+  top: -10px;
+  padding-top: 20px;
+
+  padding: 5px 0;
+  border: 1px solid $gray;
+
+  @include shadow($gray, 3px, 3px, 6px);
+  @include simple-gradient(#f0f9ff, $white);
+  @include rounded-corners(10px);
+}
+
+
+h1, h2, h3, h4, h5, h6 {
+  font-weight: bold;
+}
+
+h1 {
+  font-size: 2.5em;
+}
+
+h2 {
+  font-size: 1.8em;
+}
+
+h3 {
+  font-size: 1.67em;
+}
+
+footer {
+  color: $darkgray;
+  font-size: 0.7em;
+  width: 100%;
+  text-align: center;
+}
+
+h1, h2, h3, h4, h5, h6, p, span, a, footer, header, address, cite, code, del, ins {
+  font-family: "CartoGothic Std", "Verdana", "Lucida Grande", "Gill Sans", "Arial", "Helvetica", sans-serif;
+}
+
+.important {
+  font-family: "Andron Freefont LAT", "Hoefler Text", "Baskerville", "Palatino", "Georgia", "Times New Roman", serif; font-size: 1.167em;
+}
+
+tt, pre, code {
+  font-family: "Liberation Mono", Menlo, Courier New, Courier, Mono, monospace; font-size: 0.926em;
+}
+
+#logo {
+  position: absolute;
+  top: 10px;
+  text-indent: -1000em;
+  background: url("../img/logo.gif") no-repeat;
+  width: 130px;
+  height: 78px;
+  margin: 0 0 0 7px;
+}
+
+header {
+  margin-top: 70px;
+}
+
+#right-buttons {
+  width: 450px;
+  position: absolute;
+  top: 30px;
+  right: 0px;
+  padding: 0 25px 0;
+  text-align: right;
+}
+
+#right-buttons button {
+  font-size: 0.8em;
+}
+
+#title {
+  width: 100%;
+  text-align: center;
+  color: $brown;
+}
+
+nav {
+  height: 40px;
+  overflow: hidden;
+  background: #DFEFFC url(./redmond/images/ui-bg_glass_85_dfeffc_1x400.png) 50% 50% repeat-x;
+  border-top: 1px solid #C5DBEC;
+  border-bottom: 1px solid #C5DBEC;
+  width: 100%;
+  margin:  5px 0 0;
+  padding: 0;
+}
+
+nav ul {
+  margin:  0;
+  padding:  0;
+  list-style-type: none;
+  text-align: center;
+}
+
+nav ul li {
+  display: inline;
+  padding:  0;
+  margin:  0;
+  position: relative;
+  top: -1px;
+}
+
+nav ul li a {
+  text-align: center;
+  display: inline-block;
+  height: 30px;
+  margin:  0;
+  padding:  10px 0 0;
+  color: $black;
+  font-size: 1.1em;
+  text-decoration: none;
+  width: 130px;
+  border: 1px solid #C5DBEC;
+  border-collapse: collapse;
+  background: #DFEFFC url(./redmond/images/ui-bg_glass_85_dfeffc_1x400.png) 50% 50% repeat-x;
+  font-weight: 700;
+}
+
+#crunchtime-link {
+  top: auto;
+  position: absolute;
+  right: 0px;
+  margin:  0;
+}
+#crunchtime-link a {
+  margin:  0;
+}
+
+nav ul li a:hover {
+  background: url(./redmond/images/ui-bg_glass_75_d0e5f5_1x400.png) 50% 50% repeat-x;
+}
+
+nav ul li a:active {
+  background: url(./redmond/images/ui-bg_inset-hard_100_f5f8f9_1x100.png) 50% 50% repeat-x;
+}

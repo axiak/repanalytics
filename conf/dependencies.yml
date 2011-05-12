@@ -1,0 +1,10 @@
+# Application dependencies
+
+require:
+    - play
+    - play -> press 1.0.18
+    - play -> sass 1.0
+    - play -> greenscript 1.2d
+    - play -> antify 1.0
+    - org.scribe -> scribe 1.2.0
+    - com.googlecode.libphonenumber -> libphonenumber 3.3

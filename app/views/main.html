@@ -1,0 +1,104 @@
+<!doctype html>
+<!--[if lt IE 7 ]> <html class="no-js ie6" lang="en"> <![endif]-->
+<!--[if IE 7 ]>    <html class="no-js ie7" lang="en"> <![endif]-->
+<!--[if IE 8 ]>    <html class="no-js ie8" lang="en"> <![endif]-->
+<!--[if (gte IE 9)|!(IE)]><!--> <html class="no-js" lang="en"> <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+
+  <title>#{get 'title' /} - ${play.Play.configuration.getProperty("application.name", "Reputation Manager")}</title>
+  <meta name="description" content="">
+  <meta name="author" content="CrunchTime! Information Systems">
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  *{ TODO - Set a favicon and apple touch icon. }*
+  *{<link rel="shortcut icon" href="@{'/public/favicon.ico'}">}*
+  *{<link rel="apple-touch-icon" href="@{'public/apple-touch-icon.png'}">}*
+
+  <link href='http://fonts.googleapis.com/css?family=News+Cycle' rel='stylesheet' type='text/css'>
+
+  <link rel="stylesheet" href="@{'public/css/reset.css'}">
+  <link rel="stylesheet" href="@{'public/css/yui-reset-fonts-grids.css'}">
+  <link rel="stylesheet" href="@{'public/css/redmond/jquery-ui-1.8.12.custom.css'}">
+  <link rel="stylesheet" href="@{'public/css/style.scss'}">
+  #{get 'moreStyles' /}
+
+  <script src="@{'public/js/libs/modernizr-1.7.min.js'}"></script>
+  #{get 'moreScripts' /}
+
+</head>
+
+<body class="yui-skin-sam">
+  <div id="main_container">
+    <div id="doc2" class="yui-t7">
+      <header id="hd" role="banner">
+        <div id="logo">
+        CrunchTime! Information Systems
+        </div>
+        <div id="right-buttons">
+          <button id="login-button" class="ui-button-text ui-button ui-widget ui-state-default ui-corner-all ui-button-text-only">Login</button>
+        </div>
+        <h1 id="title">${play.Play.configuration.getProperty("application.name", "Reputation Manager")}</h1>
+        <nav>
+          <ul>
+            <li>
+              <a href="/products/">Demo</a>
+            </li>
+            <li>
+              <a href="/products/">Products</a>
+            </li>
+            <li>
+              <a href="/products/">My Restaurant</a>
+            </li>
+            <li>
+              <a href="/products/">Alerts</a>
+            </li>
+
+            <li id="crunchtime-link">
+              <a class="enabled" href="http://ww.crunchtime.com/">CrunchTime!</a>
+            </li>
+          </ul>
+        </nav>
+      </header>
+
+      <div id="main" role="main">
+        <div class="yui-g">
+           #{doLayout /}
+        </div>
+      </div>
+
+
+
+      <footer id="ft" role="contentinfo">
+        &copy;2011${(new java.util.Date().year == 111) ? "" : ("&ndash;" + (new java.util.Date().year + 1900)).raw()}
+        CrunchTime! Inc. All rights reserved. <a href="http://www.crunchtime.com" title="CrunchTime! Home Page">CrunchTime.com</a>
+      </footer>
+    </div>
+  </div>
+  <script src="//ajax.googleapis.com/ajax/libs/jquery/1.5.1/jquery.js"></script>
+  <script>window.jQuery || document.write("<script src='@{'/public/js/libs/jquery-1.5.2.min.js'}'>\x3C/script>")</script>
+  <script src="@{'public/js/libs/jquery-ui-1.8.12.custom.min.js'}"></script>
+
+  <!-- scripts concatenated and minified via ant build script-->
+  <script src="@{'public/js/plugins.js'}"></script>
+  <script src="@{'public/js/script.js'}"></script>
+  <!-- end scripts-->
+
+  <!--[if lt IE 7 ]>
+    <script src="@{'public/js/libs/dd_belatedpng.js'}"></script>
+    <script>DD_belatedPNG.fix("img, .png_bg");</script>
+  <![endif]-->
+
+  <script>
+      /* TODO - Set google analytics code.
+    var _gaq=[["_setAccount","UA-XXXXX-X"],["_trackPageview"]];
+    (function(d,t){var g=d.createElement(t),s=d.getElementsByTagName(t)[0];g.async=1;
+    g.src=("https:"==location.protocol?"//ssl":"//www")+".google-analytics.com/ga.js";
+    s.parentNode.insertBefore(g,s)}(document,"script"));
+    */
+  </script>
+
+</body>
+</html>
