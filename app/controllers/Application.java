@@ -6,6 +6,10 @@ import play.libs.F;
 import play.mvc.*;
 
 import java.util.*;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 import models.*;
 import service.RemoteBusinessSearchBuilder;
@@ -16,12 +20,14 @@ public class Application extends Controller {
     public static void index() {
         RemoteBusinessSearchBuilder rbsb = new RemoteBusinessSearchBuilder(new YelpV2API());
 
-        List<F.Tuple<Double, Business>> businesses = rbsb
+        List<F.Tuple<Double, Business>> businesses = await(rbsb
                 .name("Cheesecake Factory")
                 .city("Cambridge")
                 .address("100 Cambridgeside Place")
                 .state("MA")
-                .search();
+                .phone("6172523810")
+                .searchAsync());
+
         renderArgs.put("businesses", businesses);
         render();
     }

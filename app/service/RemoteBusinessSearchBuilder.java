@@ -20,13 +20,17 @@ import play.libs.F;
 import javax.annotation.Nullable;
 import java.lang.reflect.Field;
 import java.util.*;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 
 import static util.SimpleMD5.md5hex;
 
 public final class RemoteBusinessSearchBuilder {
     RemoteBusinessFinder service;
     Map<String, String> searchParameters;
-
+    private final static ExecutorService executorService = Executors.newCachedThreadPool();
 
     public RemoteBusinessSearchBuilder(RemoteBusinessFinder service) {
         this.service = service;
@@ -74,23 +78,17 @@ public final class RemoteBusinessSearchBuilder {
         return sortResults(results);
     }
 
-    private List<F.Tuple<Double, Business>> sortResults(List<Business> results) {
-        List<F.Tuple<Double, Business>> data = new ArrayList<F.Tuple<Double, Business>>(Collections2.transform(results, new Function<Business, F.Tuple<Double, Business>>() {
+    public Future<List<F.Tuple<Double, Business>>> searchAsync() {
+        return executorService.submit(new Callable<List<F.Tuple<Double, Business>>>(){
             @Override
-            public F.Tuple<Double, Business> apply(@Nullable Business business) {
-                double total = 1;
-                for (Map.Entry<String, String> entry : searchParameters.entrySet()) {
-                    String key = entry.getKey();
-                    if (normalizeField(key, entry.getValue()).equals(
-                        normalizeField(key, getBusinessField(business, key)))) {
-                        total *= 0.2;
-                    } else {
-                        total *= 0.8;
-                    }
-                }
-                return new F.Tuple<Double, Business>(1 - total, business);
+            public List<F.Tuple<Double, Business>> call() throws Exception {
+                return search();
             }
-        }));
+        });
+    }
+
+    private List<F.Tuple<Double, Business>> sortResults(List<Business> results) {
+        List<F.Tuple<Double, Business>> data = new ArrayList<F.Tuple<Double, Business>>(Collections2.transform(results, new ProbabilisticMatcher(searchParameters)));
         Collections.sort(data, new Comparator<F.Tuple<Double, Business>>(){
             @Override
             public int compare(F.Tuple<Double, Business> doubleBusinessTuple, F.Tuple<Double, Business> doubleBusinessTuple1) {
@@ -98,34 +96,6 @@ public final class RemoteBusinessSearchBuilder {
             }
         });
         return data;
-    }
-
-    private String getBusinessField(Business business, String parameter) {
-        try {
-            Field field = Business.class.getField(parameter);
-            return (String)field.get(business);
-        } catch (NoSuchFieldException e) {
-            Logger.info(e, "Issue getting parameter from Business object.");
-        } catch (IllegalAccessException e) {
-            Logger.info(e, "Issue getting parameter from Business object.");
-        }
-        return "";
-    }
-
-    private String normalizeField(String fieldName, String value) {
-        if (value == null) {
-            return "";
-        } else if ("phone".equals(fieldName)) {
-            try {
-                PhoneNumberUtil pnu = PhoneNumberUtil.getInstance();
-                return pnu.format(pnu.parse(value, "US"), PhoneNumberUtil.PhoneNumberFormat.NATIONAL);
-            } catch (NumberParseException e) {
-                return value.trim().toLowerCase(Locale.getDefault());
-            }
-        } else {
-           return value.trim().toLowerCase(Locale.getDefault());
-        }
-
     }
 
     private List<Double> getCoordinates() {

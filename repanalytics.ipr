@@ -289,6 +289,13 @@
       </item>
     </group>
   </component>
+  <component name="ProjectDictionaryState">
+    <dictionary name="axiak">
+      <words>
+        <w>levenshtein</w>
+      </words>
+    </dictionary>
+  </component>
   <component name="ProjectModuleManager">
     <modules>
       <module fileurl="file://$PROJECT_DIR$/repanalytics.iml" filepath="$PROJECT_DIR$/repanalytics.iml" />
