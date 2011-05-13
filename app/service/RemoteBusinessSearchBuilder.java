@@ -1,25 +1,27 @@
 package service;
 
+import com.google.code.geocoder.Geocoder;
+import com.google.code.geocoder.GeocoderRequestBuilder;
+import com.google.code.geocoder.model.GeocodeResponse;
+import com.google.code.geocoder.model.GeocoderRequest;
+import com.google.code.geocoder.model.GeocoderResult;
+import com.google.code.geocoder.model.LatLng;
 import com.google.common.base.Function;
 import com.google.common.base.Joiner;
 import com.google.common.collect.Collections2;
 import com.google.common.primitives.Doubles;
 import com.google.i18n.phonenumbers.NumberParseException;
 import com.google.i18n.phonenumbers.PhoneNumberUtil;
-import geo.google.GeoAddressStandardizer;
-import geo.google.GeoException;
-import geo.google.datamodel.GeoCoordinate;
-import geo.google.datamodel.GeoUsAddress;
 import models.businesses.Business;
 import play.Logger;
-import play.Play;
+import play.cache.Cache;
 import play.libs.F;
 
 import javax.annotation.Nullable;
 import java.lang.reflect.Field;
 import java.util.*;
 
-import static geo.google.datamodel.GeoAddressAccuracy.UNKNOWN_LOCATION;
+import static util.SimpleMD5.md5hex;
 
 public final class RemoteBusinessSearchBuilder {
     RemoteBusinessFinder service;
@@ -63,11 +65,11 @@ public final class RemoteBusinessSearchBuilder {
 
 
     public List<F.Tuple<Double, Business>> search() {
-        F.Tuple<Double, Double> coordinates = getCoordinates();
+        List<Double> coordinates = getCoordinates();
 
         List<Business> results = service.findBusinessesByNameAndPhone(get("name"),
-                                                                      coordinates._1,
-                                                                      coordinates._2,
+                                                                      coordinates.get(0),
+                                                                      coordinates.get(1),
                                                                       20);
         return sortResults(results);
     }
@@ -126,20 +128,26 @@ public final class RemoteBusinessSearchBuilder {
 
     }
 
-    private F.Tuple<Double, Double> getCoordinates() {
-        GeoAddressStandardizer st = new GeoAddressStandardizer(Play.configuration.getProperty("google.api.key"));
+    private List<Double> getCoordinates() {
         String addressLine = Joiner.on(", ").skipNulls().join(Arrays.asList(get("address"), get("city"), get("state")));
-        List<GeoUsAddress> usAddresses;
-        try {
-            usAddresses = st.standardizeToGeoUsAddresses(addressLine);
-        } catch (GeoException e) {
-            throw new RuntimeException(e);
+        String cacheKey = "geocode_" + md5hex(addressLine);
+        @SuppressWarnings("unchecked")
+        List<Double> result = Cache.get(cacheKey, List.class);
+        if (result != null) {
+            return result;
         }
-        if (usAddresses.size() == 0 || UNKNOWN_LOCATION.equals(usAddresses.get(0).getAccuracy())) {
+        GeocoderRequest request = new GeocoderRequestBuilder().setAddress(addressLine).getGeocoderRequest();
+
+        GeocodeResponse response = new Geocoder().geocode(request);
+        List<GeocoderResult> addresses = response.getResults();
+
+        if (addresses.size() == 0) {
             throw new IllegalArgumentException("Cannot find address provided.");
         }
-        GeoCoordinate coordinate = usAddresses.get(0).getCoordinate();
-        return new F.Tuple<Double, Double>(coordinate.getLatitude(), coordinate.getLongitude());
+        LatLng latlng = addresses.get(0).getGeometry().getLocation();
+        result = Arrays.asList(latlng.getLat().doubleValue(), latlng.getLng().doubleValue());
+        Cache.set(cacheKey, result, "1440mn");
+        return result;
     }
 
     private String get(String parameter) {

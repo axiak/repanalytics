@@ -1,5 +1,6 @@
 package models.businesses;
 
+import com.google.common.base.Objects;
 import play.db.jpa.Model;
 
 import javax.persistence.Entity;
@@ -15,4 +16,17 @@ public class Business extends Model {
     public String zip;
     public String phone;
 
+    @Override
+    public String toString() {
+        return "Business{" +
+                "latitude=" + latitude +
+                ", longitude=" + longitude +
+                ", name='" + name + '\'' +
+                ", address='" + address + '\'' +
+                ", city='" + city + '\'' +
+                ", state='" + state + '\'' +
+                ", zip='" + zip + '\'' +
+                ", phone='" + phone + '\'' +
+                '}';
+    }
 }

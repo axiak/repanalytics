@@ -5,6 +5,7 @@ import com.google.common.collect.ImmutableMap;
 import com.google.gson.FieldNamingPolicy;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.google.gson.reflect.TypeToken;
 import com.yelp.v2.YelpSearchResult;
 import models.businesses.Business;
 import org.scribe.builder.ServiceBuilder;
@@ -13,11 +14,17 @@ import org.scribe.model.Response;
 import org.scribe.model.Token;
 import org.scribe.model.Verb;
 import org.scribe.oauth.OAuthService;
+import play.cache.Cache;
 import service.RemoteBusinessFinder;
+import util.SimpleMD5;
 
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+
+import static util.SimpleMD5.md5hex;
 
 
 public class YelpV2API implements YelpAPI, RemoteBusinessFinder {
@@ -46,14 +53,20 @@ public class YelpV2API implements YelpAPI, RemoteBusinessFinder {
         service.signRequest(accessToken, request);
 
         Response response = request.send();
-        System.out.println(response.getBody());
         return gson.fromJson(response.getBody(),
                              YelpSearchResult.class);
     }
 
     @Override
     public List<Business> findBusinessesByNameAndPhone(String name, double lat, double lng, int distance) {
-        List<Business> businesses = new ArrayList<Business>();
+        String cacheKey = "yelp_" +
+                          md5hex("" + lat + "," + lng + "," + distance + "," + name.toLowerCase().trim());
+
+        @SuppressWarnings("unchecked")
+        List<Business> businesses = Cache.get(cacheKey, List.class);
+        if (businesses != null) {
+            return businesses;
+        }
 
         YelpSearchResult result = getYelpSearchResults(ImmutableMap.<String, String>of(
                 "term", name,
@@ -62,6 +75,7 @@ public class YelpV2API implements YelpAPI, RemoteBusinessFinder {
                 "ll", Joiner.on(",").join(lat, lng),
                 "limit", "20"));
 
+        businesses = new ArrayList<Business>();
         for (com.yelp.v2.Business business : result.getBusinesses()) {
             Business mBusiness = new Business();
             mBusiness.address = Joiner.on(", ").skipNulls().join(business.getLocation().getAddress());
@@ -74,6 +88,8 @@ public class YelpV2API implements YelpAPI, RemoteBusinessFinder {
             mBusiness.zip = business.getLocation().getPostalCode();
             businesses.add(mBusiness);
         }
+        System.out.println(cacheKey);
+        Cache.set(cacheKey, businesses, "1440mn");
         return businesses;
     }
 }
