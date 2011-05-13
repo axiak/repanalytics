@@ -28,6 +28,14 @@ $lightblue: #d5ecfa;
   @include pie;
 }
 
+@mixin opacity($percentage) {
+  -ms-filter:"progid:DXImageTransform.Microsoft.Alpha(Opacity=$percentage)";
+  filter: alpha(opacity=$percentage);
+  -moz-opacity: $percentage / 100;
+  -khtml-opacity: $percentage / 100;
+   opacity: $percentage / 100;
+}
+
 @mixin simple-gradient($colorTop, $colorBottom) {
   background: -webkit-gradient(linear, 0 0, 0 bottom, from($colorTop), to($colorBottom));
   background: -moz-linear-gradient($colorTop, $colorBottom);
@@ -202,4 +210,8 @@ nav ul li a:hover {
 
 nav ul li a:active {
   background: url(./redmond/images/ui-bg_inset-hard_100_f5f8f9_1x100.png) 50% 50% repeat-x;
+}
+
+#login-button {
+  @include opacity(30);
 }

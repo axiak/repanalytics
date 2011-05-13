@@ -44,20 +44,20 @@
         <nav>
           <ul>
             <li>
-              <a href="/products/">Demo</a>
+              <a href="/demo/">Demo</a>
             </li>
             <li>
               <a href="/products/">Products</a>
             </li>
             <li>
-              <a href="/products/">My Restaurant</a>
+              <a href="/me/">My Restaurant</a>
             </li>
             <li>
-              <a href="/products/">Alerts</a>
+              <a href="/me/alerts/">Alerts</a>
             </li>
 
             <li id="crunchtime-link">
-              <a class="enabled" href="http://ww.crunchtime.com/">CrunchTime!</a>
+              <a class="enabled" href="http://www.crunchtime.com/">CrunchTime!</a>
             </li>
           </ul>
         </nav>
@@ -69,8 +69,6 @@
         </div>
       </div>
 
-
-
       <footer id="ft" role="contentinfo">
         &copy;2011${(new java.util.Date().year == 111) ? "" : ("&ndash;" + (new java.util.Date().year + 1900)).raw()}
         CrunchTime! Inc. All rights reserved. <a href="http://www.crunchtime.com" title="CrunchTime! Home Page">CrunchTime.com</a>
@@ -81,10 +79,8 @@
   <script>window.jQuery || document.write("<script src='@{'/public/js/libs/jquery-1.5.2.min.js'}'>\x3C/script>")</script>
   <script src="@{'public/js/libs/jquery-ui-1.8.12.custom.min.js'}"></script>
 
-  <!-- scripts concatenated and minified via ant build script-->
   <script src="@{'public/js/plugins.js'}"></script>
   <script src="@{'public/js/script.js'}"></script>
-  <!-- end scripts-->
 
   <!--[if lt IE 7 ]>
     <script src="@{'public/js/libs/dd_belatedpng.js'}"></script>

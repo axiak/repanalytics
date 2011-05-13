@@ -7,3 +7,4 @@ require:
     - play -> antify 1.0
     - org.scribe -> scribe 1.2.0
     - com.googlecode.libphonenumber -> libphonenumber 3.3
+    - com.google.guava -> guava r09

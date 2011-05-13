@@ -1,4 +1,4 @@
-package models.yelp;
+package service.yelp;
 
 
 import com.yelp.v2.YelpSearchResult;

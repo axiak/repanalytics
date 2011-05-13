@@ -1,4 +1,4 @@
-package models.yelp;
+package service.yelp;
 
 import com.google.gson.FieldNamingPolicy;
 import com.google.gson.Gson;
