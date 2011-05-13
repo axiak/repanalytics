@@ -14,9 +14,40 @@ Or with PLAY_PATH environment variable:
         <isset property="env.PLAY_PATH"/>
     </condition>
     <property name="play.path" value="${play.default.path}"/>
+    <property name="war.dir" value="${java.io.tmpdir}/_repmanage"/>
+    <property name="war.file" value="./dist/ROOT.war" />
+    <property name="version" value="00.00.00.01" />
 
     <property name="play.antify.path" value="${play.path}/modules/antify-1.0"/>
     <property name="test.start.delay" value="5"/>
     <import file="${play.antify.path}/application-build.xml"/>
+
+    <target name="war">
+        <delete dir="${war.dir}" />
+        <mkdir dir="${war.dir}" />
+        <play-python command="war" options=". -o ${war.dir}/ROOT" />
+        <exec executable="perl" logError="true" outputProperty="dist.revision" failonerror="true">
+          <arg value="bin/revision.pl" />
+        </exec>
+        <war destfile="${war.file}" webxml="${war.dir}/ROOT/WEB-INF/web.xml">
+          <manifest>
+            <attribute name="Built-By" value="${user.name}"/>
+            <attribute name="Source-Revision" value="${dist.revision}"/>
+            <section name="com/crunchtime/netchef">
+              <attribute name="Specification-Title" value="Meridian Server"/>
+              <attribute name="Specification-Version" value="${version}"/>
+              <attribute name="Specification-Vendor" value="CrunchTime! Information Systems"/>
+              <attribute name="Implementation-Title" value="repmanage"/>
+              <attribute name="Implementation-Version" value="${version} ${TODAY}"/>
+              <attribute name="Implementation-Vendor" value="CrunchTime! Information Systems"/>
+            </section>
+          </manifest>
+          <fileset dir="${war.dir}/ROOT">
+            <exclude name="**/*.jsp"/>
+            <exclude name="**/*.java"/>
+          </fileset>
+        </war>
+
+    </target>
 
 </project>
