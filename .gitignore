@@ -1,4 +1,8 @@
+logs/
+server.pid
 precompiled/
+dist/
+target/
 out/
 tmp/
 modules/
