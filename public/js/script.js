@@ -1,7 +1,7 @@
 $(function () {
     $("button, input:submit").button();
-    $("nav a").click(function () {
-        return ($(this).hasClass("enabled"));
+    $("nav a.disabled").click(function (e) {
+        e.preventDefault();
     });
 
     var $crunchtimeLink = $("#crunchtime-link");
@@ -18,6 +18,11 @@ $(function () {
                 minLength: 2,
                 delay: 100,
                 autoFocus: true,
+                change: function (event, ui) {
+                    if (ui.item) {
+                        $("#chain").attr({checked: "checked"});
+                    }
+                },
                 source: function (request, response) {
                     var term = request.term;
                     if (term in cache) {

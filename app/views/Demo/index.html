@@ -7,30 +7,34 @@
 
 <fieldset>
     <form action="/demo/search/" method="" name="business-info" id="business-info">
-        <input type="text" name="name" placeholder="Restaurant Name"
-               title="Restaurant Name" class="placeholder required" value="" id="demo-name">
-        <br>
-        <input type="text" name="phone" placeholder="Phone Number"
-                                       title="Phone Number" class="placeholder required" value="">
-        <br>
-        <input type="text" name="address" placeholder="Street Address"
+      <span class="require-info">*</span>
+      <input type="text" name="name" placeholder="Restaurant Name"
+             title="Restaurant Name" class="placeholder required" value="" id="demo-name">
+      <br>
+      <span class="require-info">*</span>
+      <input type="text" name="address" placeholder="Street Address" id="demo-address"
                                        title="Street Address" class="placeholder required" value="">
-        <br>
-        <input type="text" name="city" placeholder="City"
-                       title="City" class="placeholder required" value="">
-        <select class="required" name="state">
+      <br>
+      <span class="require-info">*</span>
+      <input type="text" name="city" placeholder="City" id="demo-city"
+                     title="City" class="placeholder required" value="">
+      <select class="required" name="state">
             <option value="">State</option>
             <option value="">-----</option>
             #{list items:states, as:'state' }
               <option value="${state}"${currentState == state ? " selected" : ""}>${state}</option>
             #{/list}
-        </select>
-        <input type="text" size="6" maxlength="5" name="zip" placeholder="Zip"
-                       title="Zip" class="placeholder required" value="">
+      </select>
+      <input type="text" size="6" maxlength="5" name="zip" placeholder="Zip"
+                     title="Zip" class="placeholder required" value="">
 
-        <br>
-        <input type="checkbox" name="chain" id="chain"><label for="chain">This is a multi-unit restaurant chain.</label>
-        <br>
-        <input type="submit" name="go" id="go" value="Go">
+      <br>
+
+      <input type="text" name="phone" placeholder="Phone Number" id="demo-phone"
+                                     title="Phone Number" class="placeholder" value="">
+      <br>
+      <input type="checkbox" name="chain" id="chain"><label for="chain">This is a multi-unit restaurant chain.</label>
+      <br>
+      <input type="submit" name="go" id="go" value="Go">
     </form>
 </fieldset>

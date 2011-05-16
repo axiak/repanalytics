@@ -17,7 +17,7 @@
   *{<link rel="shortcut icon" href="@{'/public/favicon.ico'}">}*
   *{<link rel="apple-touch-icon" href="@{'public/apple-touch-icon.png'}">}*
 
-  <link href='http://fonts.googleapis.com/css?family=News+Cycle' rel='stylesheet' type='text/css'>
+  <link href='//fonts.googleapis.com/css?family=News+Cycle' rel='stylesheet' type='text/css'>
 
   <link rel="stylesheet" href="@{'public/css/reset.css'}">
   <link rel="stylesheet" href="@{'public/css/yui-reset-fonts-grids.css'}">
@@ -44,20 +44,20 @@
         <nav>
           <ul>
             <li>
-              <a class="enabled" href="/demo/">Demo</a>
+              <a href="/demo/">Demo</a>
             </li>
             <li>
-              <a href="/products/">Products</a>
+              <a class="disabled" href="/products/">Products</a>
             </li>
             <li>
-              <a href="/me/">My Restaurant</a>
+              <a class="disabled" href="/me/">My Restaurant</a>
             </li>
             <li>
-              <a href="/me/alerts/">Alerts</a>
+              <a class="disabled" href="/me/alerts/">Alerts</a>
             </li>
 
             <li id="crunchtime-link">
-              <a class="enabled" href="http://www.crunchtime.com/">CrunchTime!</a>
+              <a href="http://www.crunchtime.com/">CrunchTime!</a>
             </li>
           </ul>
         </nav>
@@ -80,6 +80,8 @@
   <script>window.jQuery || document.write("<script src='@{'/public/js/libs/jquery-1.5.2.min.js'}'>\x3C/script>")</script>
   <script src="@{'public/js/libs/jquery-ui-1.8.12.custom.min.js'}"></script>
   <script src="@{'public/js/libs/jquery.validate.min.js'}"></script>
+  <script src="@{'public/js/libs/jquery.livequery.js'}"></script>
+  <script src="@{'public/js/libs/jquery.placeholder.js'}"></script>
 
   <script src="@{'public/js/plugins.js'}"></script>
   <script src="@{'public/js/script.js'}"></script>

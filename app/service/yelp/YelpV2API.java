@@ -79,7 +79,9 @@ public class YelpV2API implements YelpAPI, RemoteBusinessFinder, PhoneBusinessSe
         for (JsonElement element : result.getAsJsonObject().get("businesses").getAsJsonArray()) {
             JsonObject object = element.getAsJsonObject();
             YelpBusiness mBusiness = new YelpBusiness();
-            mBusiness.address = Joiner.on(", ").skipNulls().join(object.get("address1"), object.get("address2"), object.get("address3"));
+            mBusiness.address = Joiner.on(", ").skipNulls().join(makeEmptyNull(object.get("address1").getAsString()),
+                                                                 makeEmptyNull(object.get("address2").getAsString()),
+                                                                 makeEmptyNull(object.get("address3").getAsString()));
             mBusiness.city = object.get("city").getAsString();
             mBusiness.latitude = object.get("latitude").getAsDouble();
             mBusiness.longitude = object.get("longitude").getAsDouble();
@@ -128,5 +130,13 @@ public class YelpV2API implements YelpAPI, RemoteBusinessFinder, PhoneBusinessSe
         }
         Cache.set(cacheKey, businesses, "1440mn");
         return businesses;
+    }
+
+    private Object makeEmptyNull(Object input) {
+        if (input != null && input.toString().trim().length() == 0) {
+            return null;
+        } else {
+            return input;
+        }
     }
 }

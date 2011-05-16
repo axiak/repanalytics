@@ -215,6 +215,45 @@ nav ul li a:active {
   background: url(./redmond/images/ui-bg_inset-hard_100_f5f8f9_1x100.png) 50% 50% repeat-x;
 }
 
+nav a.disabled {
+  color: #bbb;
+}
+
 #login-button {
   @include opacity(30);
+}
+
+@mixin placeholderStyle {
+  color: #ccc;
+  font-style: italic;
+}
+
+::-webkit-input-placeholder {
+  @include placeholderStyle;
+}
+.hasPlaceholder {
+  @include placeholderStyle;
+}
+:-moz-placeholder {
+  @include placeholderStyle;
+}
+
+#business-info input, #business-info select {
+  border: 1px solid #C5DBEC;
+  padding: 5px;
+  font-size: 1.2em;
+  margin:  5px 0;
+}
+
+#business-info select {
+  padding:  4px;
+  margin:  5px 8px;
+}
+
+#business-info #demo-name, #business-info #demo-address {
+  width: 600px;
+}
+
+#business-info #demo-city {
+  width: 325px;
 }
