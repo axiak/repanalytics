@@ -7,6 +7,7 @@ import com.google.i18n.phonenumbers.NumberParseException;
 import com.google.i18n.phonenumbers.PhoneNumberUtil;
 import com.yelp.v2.YelpSearchResult;
 import models.businesses.Business;
+import models.businesses.Review;
 import models.businesses.YelpBusiness;
 import org.scribe.builder.ServiceBuilder;
 import org.scribe.model.OAuthRequest;
@@ -14,8 +15,10 @@ import org.scribe.model.Response;
 import org.scribe.model.Token;
 import org.scribe.model.Verb;
 import org.scribe.oauth.OAuthService;
+import play.Logger;
 import play.Play;
 import play.cache.Cache;
+import play.libs.F;
 import play.libs.WS;
 import service.search.PhoneBusinessSearcher;
 import service.search.RemoteBusinessFinder;
@@ -24,14 +27,14 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import static com.google.common.base.Preconditions.checkNotNull;
 import static play.libs.Codec.hexMD5;
 
 
 public class YelpV2API implements YelpAPI, RemoteBusinessFinder, PhoneBusinessSearcher {
     private static Gson gson = new GsonBuilder().setFieldNamingPolicy(FieldNamingPolicy.LOWER_CASE_WITH_UNDERSCORES).create();
 
-    @Override
-    public YelpSearchResult getYelpSearchResults(Map<String, String> params) {
+    private F.Tuple<OAuthService, Token> getYelpOAuthInfo() {
         OAuthService service = new ServiceBuilder()
                 .provider(YelpV2OauthAPI.class)
                 .apiKey(Play.configuration.getProperty("yelp.consumer.key"))
@@ -40,6 +43,13 @@ public class YelpV2API implements YelpAPI, RemoteBusinessFinder, PhoneBusinessSe
 
         Token accessToken = new Token(Play.configuration.getProperty("yelp.token"),
                                       Play.configuration.getProperty("yelp.secret.token"));
+        return new F.Tuple<OAuthService, Token>(service, accessToken);
+    }
+
+
+    @Override
+    public YelpSearchResult getYelpSearchResults(Map<String, String> params) {
+        F.Tuple<OAuthService, Token> oAuthInfo = getYelpOAuthInfo();
 
         OAuthRequest request = new OAuthRequest(Verb.GET,
                 "http://api.yelp.com/v2/search");
@@ -47,7 +57,7 @@ public class YelpV2API implements YelpAPI, RemoteBusinessFinder, PhoneBusinessSe
         for (Map.Entry<String, String> entry : params.entrySet()) {
             request.addQuerystringParameter(entry.getKey(), entry.getValue());
         }
-        service.signRequest(accessToken, request);
+        oAuthInfo._1.signRequest(oAuthInfo._2, request);
 
         Response response = request.send();
         return gson.fromJson(response.getBody(),
@@ -138,5 +148,23 @@ public class YelpV2API implements YelpAPI, RemoteBusinessFinder, PhoneBusinessSe
         } else {
             return input;
         }
+    }
+
+
+    public List<Review> getReviews(Business business) {
+        if (business.yelpId == null) {
+            return new ArrayList<Review>();
+        }
+        F.Tuple<OAuthService, Token> oAuthInfo = getYelpOAuthInfo();
+
+        OAuthRequest request = new OAuthRequest(Verb.GET,
+                "http://api.yelp.com/v2/business/" + business.yelpId);
+
+        oAuthInfo._1.signRequest(oAuthInfo._2, request);
+
+        Response response = request.send();
+
+        Logger.debug("Response: %s", response.getBody());
+        return new ArrayList<Review>();
     }
 }

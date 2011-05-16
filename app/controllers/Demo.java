@@ -22,6 +22,7 @@ import service.yelp.YelpV2API;
 import static com.google.common.collect.Collections2.transform;
 import static com.maxmind.geoip.LookupService.GEOIP_MEMORY_CACHE;
 import static play.libs.Codec.hexMD5;
+import static util.Requests.getIpAddress;
 
 public class Demo extends Controller {
     private static LookupService geoIp = null;
@@ -42,7 +43,7 @@ public class Demo extends Controller {
         if (geoIp == null) {
             initializeGeoIp();
         }
-        Location l = geoIp.getLocation(getIpAddress());
+        Location l = geoIp.getLocation(getIpAddress(request));
         renderArgs.put("states", STATE_CODES);
         renderArgs.put("currentState", l.region);
         render();
@@ -77,18 +78,5 @@ public class Demo extends Controller {
         renderJSON(businesses, new TypeToken<List<F.Tuple<Double, Business>>>(){}.getType());
     }
 
-    private static String getIpAddress() {
-        String ip = null;
-        Http.Header forwardedFor = request.headers.get("x-forwarded-for");
-        if (forwardedFor == null) {
-            ip = request.remoteAddress;
-        } else {
-            ip = forwardedFor.value();
-        }
-        if (ip.startsWith("127.") || ip.startsWith("192.168.")) {
-            ip = Play.configuration.getProperty("test.ip.address", "209.113.164.2");
-        }
-        return ip;
-    }
 
 }

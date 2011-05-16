@@ -8,7 +8,7 @@ import javax.persistence.Inheritance;
 import static javax.persistence.InheritanceType.JOINED;
 
 @Entity
-@Inheritance(strategy= JOINED)
+@Inheritance(strategy=JOINED)
 public class Business extends Model {
     public Double latitude;
     public Double longitude;

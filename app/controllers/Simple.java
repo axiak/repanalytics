@@ -8,4 +8,9 @@ public class Simple extends Controller {
         new JmxInitialization().now();
         render();
     }
+
+    public static void notready() {
+        new JmxInitialization().now();
+        render();
+    }
 }

@@ -17,8 +17,7 @@
   *{<link rel="shortcut icon" href="@{'/public/favicon.ico'}">}*
   *{<link rel="apple-touch-icon" href="@{'public/apple-touch-icon.png'}">}*
 
-  <link href='//fonts.googleapis.com/css?family=News+Cycle' rel='stylesheet' type='text/css'>
-
+  <link rel="stylesheet" href="@{'public/css/fonts.css'}">
   <link rel="stylesheet" href="@{'public/css/reset.css'}">
   <link rel="stylesheet" href="@{'public/css/yui-reset-fonts-grids.css'}">
   <link rel="stylesheet" href="@{'public/css/redmond/jquery-ui-1.8.12.custom.css'}">
@@ -34,9 +33,9 @@
   <div id="main_container">
     <div id="doc2" class="yui-t7">
       <header id="hd" role="banner">
-        <div id="logo">
+        <a id="logo" border="0" href="http://www.crunchtime.com/" title="CrunchTime! Information Systems">
         CrunchTime! Information Systems
-        </div>
+        </a>
         <div id="right-buttons">
           <button id="login-button" class="ui-button-text ui-button ui-widget ui-state-default ui-corner-all ui-button-text-only">Login</button>
         </div>
@@ -44,20 +43,20 @@
         <nav>
           <ul>
             <li>
-              <a href="/demo/">Demo</a>
+              <a href="/">Home</a>
             </li>
             <li>
-              <a class="disabled" href="/products/">Products</a>
+              <a href="/get-notified/">Products</a>
             </li>
             <li>
-              <a class="disabled" href="/me/">My Restaurant</a>
+              <a href="/get-notified/">My Restaurant</a>
             </li>
             <li>
-              <a class="disabled" href="/me/alerts/">Alerts</a>
+              <a href="/get-notified/">Alerts</a>
             </li>
 
             <li id="crunchtime-link">
-              <a href="http://www.crunchtime.com/">CrunchTime!</a>
+              <a href="/demo/">Demo</a>
             </li>
           </ul>
         </nav>
@@ -65,7 +64,7 @@
 
       <div id="main" role="main">
         <div class="yui-g">
-            <h2>#{get 'title' /}</h2>
+            <h2 class="subtitle">#{get 'title' /}</h2>
            #{doLayout /}
         </div>
       </div>
@@ -87,8 +86,8 @@
   <script src="@{'public/js/script.js'}"></script>
 
   <!--[if lt IE 7 ]>
-    <script src="@{'public/js/libs/dd_belatedpng.js'}"></script>
-    <script>DD_belatedPNG.fix("img, .png_bg");</script>
+    <script type="text/javascript" src="@{'public/js/libs/dd_belatedpng.js'}"></script>
+    <script type="text/javascript">DD_belatedPNG.fix(".png_bg");</script>
   <![endif]-->
 
   <script>

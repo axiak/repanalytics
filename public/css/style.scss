@@ -16,6 +16,23 @@ $blue: #77aadd;
 $darkgray: #999;
 $offwhite: #fffffc;
 $lightblue: #d5ecfa;
+$borderBlue: #C5DBEC;
+
+h1, h2, h3, h4 {
+  font-family: "UbuntuBold", "Verdana", "Lucida Grande", "Gill Sans", "Arial", "Helvetica", sans-serif;
+}
+
+h5, h6, p, span, a, footer, header, address, cite, code, del, ins {
+  font-family: "Andron Freefont LAT", "Hoefler Text", "Baskerville", "Palatino", "Georgia", "Times New Roman", serif; font-size: 1.167em;
+}
+
+tt, pre, code {
+  font-family: "Liberation Mono", Menlo, Courier New, Courier, Mono, monospace; font-size: 0.926em;
+}
+
+nav a {
+  font-family: "UbuntuBold", "Verdana", "Lucida Grande", "Gill Sans", "Arial", "Helvetica", sans-serif;
+}
 
 @mixin pie {
   behavior: url(/public/css/PIE.htc);
@@ -82,25 +99,32 @@ html {
   border: 1px solid $gray;
 
   @include shadow($gray, 3px, 3px, 6px);
-  @include simple-gradient(#f0f9ff, $white);
+  @include simple-gradient(#d5ecf9, $white);
   @include rounded-corners(10px);
 }
 
+p {
+  font-size: 1.13em;
+}
 
 h1, h2, h3, h4, h5, h6 {
   font-weight: bold;
 }
 
 h1 {
-  font-size: 2.5em;
+  font-size: 2.6em;
 }
 
 h2 {
-  font-size: 1.8em;
+  font-size: 2.2em;
 }
 
 h3 {
-  font-size: 1.67em;
+  font-size: 1.8em;
+}
+
+h4 {
+  font-size: 1.2em;
 }
 
 footer {
@@ -110,19 +134,10 @@ footer {
   text-align: center;
 }
 
-h1, h2, h3, h4, h5, h6, p, span, a, footer, header, address, cite, code, del, ins {
-  font-family: "CartoGothic Std", "Verdana", "Lucida Grande", "Gill Sans", "Arial", "Helvetica", sans-serif;
-}
 
-.important {
-  font-family: "Andron Freefont LAT", "Hoefler Text", "Baskerville", "Palatino", "Georgia", "Times New Roman", serif; font-size: 1.167em;
-}
-
-tt, pre, code {
-  font-family: "Liberation Mono", Menlo, Courier New, Courier, Mono, monospace; font-size: 0.926em;
-}
 
 #logo {
+  display: block;
   position: absolute;
   top: 10px;
   text-indent: -1000em;
@@ -191,10 +206,9 @@ nav ul li a {
   font-size: 1.1em;
   text-decoration: none;
   width: 130px;
-  border: 1px solid #C5DBEC;
+  border: 1px solid $borderBlue;
   border-collapse: collapse;
   background: #DFEFFC url(./redmond/images/ui-bg_glass_85_dfeffc_1x400.png) 50% 50% repeat-x;
-  font-weight: 700;
 }
 
 #crunchtime-link {
@@ -254,6 +268,45 @@ nav a.disabled {
   width: 600px;
 }
 
+#business-info #demo-phone {
+  margin-left: 11px;
+}
+
 #business-info #demo-city {
   width: 325px;
+}
+
+.yui-g {
+  padding: 20px 20px 0 20px;
+}
+
+h2.subtitle {
+  margin-bottom: 15px;
+}
+
+#front-hook {
+  margin-top: 50px;
+}
+
+#left-panel {
+  width: 590px;
+  border-right:  1px solid $borderBlue;
+}
+
+#get-notified {
+  border: 1px solid #C5DBEC;
+  padding: 5px;
+  font-size: 1.2em;
+  margin:  5px 0;
+  width: 300px;
+}
+
+input:disabled {
+  cursor: default;
+  color: #BBB;
+}
+
+input.disabled {
+  cursor: default;
+  color: #BBB;
 }

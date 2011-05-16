@@ -7,6 +7,11 @@ GET     /                                       Simple.index
 GET     /demo/                                  Demo.index
 GET     /demo/name/                             Demo.name
 GET     /demo/search/                           Demo.search
+GET     /get-notified/                          Simple.notready
+
+# Registration
+POST    /notification/email/                    Registration.registerEmail
+
 
 # Map static resources from the /app/public folder to the /public path
 GET     /public/                                staticDir:public

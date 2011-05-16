@@ -40,6 +40,24 @@ $(function () {
             })
         })();
     }
+
+    $("#notified").click(function (e) {
+        var self = this;
+        e.preventDefault();
+        $.ajax({
+                    url: "/notification/email/",
+                    data: {"email": $("#get-notified").val()},
+                    type: "POST",
+                    success: function (data) {
+                        self.disabled = "";
+                        $(self).removeClass("disabled");
+                        $("#email-preview").replaceWith("<h4>Thank you!</h4>");
+                    }
+                });
+
+        this.disabled = "disabled";
+        $(this).addClass("disabled");
+    });
 });
 
 

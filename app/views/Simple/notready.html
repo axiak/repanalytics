@@ -1,0 +1,17 @@
+#{extends 'main.html' /}
+#{set title:'Get Notified.' /}
+
+<p>
+We're making it easier to see your online presence.
+</p>
+<br>
+<p>
+Get notified when you can use ${play.Play.configuration.getProperty("application.name", "Reputation Manager")}:
+</p>
+        <br>
+<form action="" method="POST" name="email-preview" id="email-preview">
+  <input id="get-notified" type="text" placeholder="What's your email address?"
+         title="What's your email address?" class="placeholder">
+
+  <input type="submit" name="notified" id="notified" value="GET NOTIFIED">
+</form>
