@@ -1,5 +1,6 @@
 package controllers;
 
+import bootstrap.JmxInitialization;
 import com.google.gson.reflect.TypeToken;
 import com.maxmind.geoip.Location;
 import com.maxmind.geoip.LookupService;
@@ -37,10 +38,10 @@ public class Demo extends Controller {
 
 
     public static void index() {
+        new JmxInitialization().now();
         if (geoIp == null) {
             initializeGeoIp();
         }
-        Logger.info("IP Address: %s", getIpAddress());
         Location l = geoIp.getLocation(getIpAddress());
         renderArgs.put("states", STATE_CODES);
         renderArgs.put("currentState", l.region);
@@ -54,7 +55,7 @@ public class Demo extends Controller {
         if (results == null) {
             List<BusinessChain> chains = BusinessChain.find("byNameIlike", "%" + term + "%").fetch();
             results = new ArrayList<String>(transform(chains, BusinessChain.nameGetter()));
-            if (results.size() > 10) {
+            if (results.size() > 15) {
                 results = new ArrayList<String>();
             }
             Cache.set(cacheKey, results, "1440min");

@@ -13,16 +13,20 @@ Or with PLAY_PATH environment variable:
     <condition property="play.path" value="${env.PLAY_PATH}">
         <isset property="env.PLAY_PATH"/>
     </condition>
+    <property name="dist.dir" value="./dist" />
     <property name="play.path" value="${play.default.path}"/>
     <property name="war.dir" value="${java.io.tmpdir}/_repmanage"/>
-    <property name="war.file" value="./dist/ROOT.war" />
+    <property name="war.file" value="${dist.dir}/ROOT.war" />
     <property name="version" value="00.00.00.01" />
 
     <property name="play.antify.path" value="${play.path}/modules/antify-1.0"/>
     <property name="test.start.delay" value="5"/>
     <import file="${play.antify.path}/application-build.xml"/>
 
-    <target name="war">
+    <target name="war" depends="clean">
+        <delete dir="./out" />
+        <delete dir="${dist.dir}" />
+        <mkdir dir="${dist.dir}" />
         <delete dir="${war.dir}" />
         <mkdir dir="${war.dir}" />
         <play-python command="war" options=". -o ${war.dir}/ROOT" />
