@@ -6,26 +6,20 @@ import com.google.code.geocoder.model.GeocodeResponse;
 import com.google.code.geocoder.model.GeocoderRequest;
 import com.google.code.geocoder.model.GeocoderResult;
 import com.google.code.geocoder.model.LatLng;
-import com.google.common.base.Function;
 import com.google.common.base.Joiner;
 import com.google.common.collect.Collections2;
 import com.google.common.primitives.Doubles;
-import com.google.i18n.phonenumbers.NumberParseException;
-import com.google.i18n.phonenumbers.PhoneNumberUtil;
 import models.businesses.Business;
-import play.Logger;
 import play.cache.Cache;
 import play.libs.F;
 
-import javax.annotation.Nullable;
-import java.lang.reflect.Field;
 import java.util.*;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
-import static util.SimpleMD5.md5hex;
+import static play.libs.Codec.hexMD5;
 
 public final class RemoteBusinessSearchBuilder {
     RemoteBusinessFinder service;
@@ -100,7 +94,7 @@ public final class RemoteBusinessSearchBuilder {
 
     private List<Double> getCoordinates() {
         String addressLine = Joiner.on(", ").skipNulls().join(Arrays.asList(get("address"), get("city"), get("state")));
-        String cacheKey = "geocode_" + md5hex(addressLine);
+        String cacheKey = "geocode_" + hexMD5(addressLine);
         @SuppressWarnings("unchecked")
         List<Double> result = Cache.get(cacheKey, List.class);
         if (result != null) {

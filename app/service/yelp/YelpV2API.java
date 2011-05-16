@@ -5,7 +5,6 @@ import com.google.common.collect.ImmutableMap;
 import com.google.gson.FieldNamingPolicy;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import com.google.gson.reflect.TypeToken;
 import com.yelp.v2.YelpSearchResult;
 import models.businesses.Business;
 import models.businesses.YelpBusiness;
@@ -17,15 +16,12 @@ import org.scribe.model.Verb;
 import org.scribe.oauth.OAuthService;
 import play.cache.Cache;
 import service.RemoteBusinessFinder;
-import util.SimpleMD5;
 
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import static util.SimpleMD5.md5hex;
+import static play.libs.Codec.hexMD5;
 
 
 public class YelpV2API implements YelpAPI, RemoteBusinessFinder {
@@ -61,7 +57,7 @@ public class YelpV2API implements YelpAPI, RemoteBusinessFinder {
     @Override
     public List<Business> findBusinessesByNameAndPhone(String name, double lat, double lng, int distance) {
         String cacheKey = "yelp_" +
-                          md5hex("" + lat + "," + lng + "," + distance + "," + name.toLowerCase().trim());
+                          hexMD5("" + lat + "," + lng + "," + distance + "," + name.toLowerCase().trim());
 
         @SuppressWarnings("unchecked")
         List<Business> businesses = Cache.get(cacheKey, List.class);

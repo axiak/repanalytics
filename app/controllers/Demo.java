@@ -1,9 +1,7 @@
 package controllers;
 
-import com.google.common.collect.Collections2;
 import com.maxmind.geoip.Location;
 import com.maxmind.geoip.LookupService;
-import com.maxmind.geoip.Region;
 import models.businesses.Business;
 import models.businesses.BusinessChain;
 import play.Logger;
@@ -19,12 +17,9 @@ import java.util.*;
 import service.RemoteBusinessSearchBuilder;
 import service.yelp.YelpV2API;
 
-import javax.swing.plaf.basic.BasicBorders;
-import javax.xml.crypto.dsig.Transform;
-
 import static com.google.common.collect.Collections2.transform;
 import static com.maxmind.geoip.LookupService.GEOIP_MEMORY_CACHE;
-import static util.SimpleMD5.md5hex;
+import static play.libs.Codec.hexMD5;
 
 public class Demo extends Controller {
     private static LookupService geoIp = null;
@@ -51,7 +46,7 @@ public class Demo extends Controller {
     }
 
     public static void name(String term) {
-        String cacheKey = "name_l_" + md5hex(term);
+        String cacheKey = "name_l_" + hexMD5(term);
         List<String> results = Cache.get(cacheKey, List.class);
         if (results == null) {
             List<BusinessChain> chains = BusinessChain.find("byNameIlike", "%" + term + "%").fetch();
