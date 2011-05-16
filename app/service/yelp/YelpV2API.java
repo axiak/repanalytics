@@ -2,17 +2,12 @@ package service.yelp;
 
 import com.google.common.base.Joiner;
 import com.google.common.collect.ImmutableMap;
-import com.google.gson.FieldNamingPolicy;
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
+import com.google.gson.*;
 import com.google.i18n.phonenumbers.NumberParseException;
 import com.google.i18n.phonenumbers.PhoneNumberUtil;
-import com.sun.deploy.net.BasicHttpRequest;
 import com.yelp.v2.YelpSearchResult;
 import models.businesses.Business;
 import models.businesses.YelpBusiness;
-import oauth.signpost.http.HttpRequest;
-import org.jboss.netty.handler.codec.http.HttpVersion;
 import org.scribe.builder.ServiceBuilder;
 import org.scribe.model.OAuthRequest;
 import org.scribe.model.Response;
@@ -22,12 +17,9 @@ import org.scribe.oauth.OAuthService;
 import play.Logger;
 import play.Play;
 import play.cache.Cache;
+import play.libs.WS;
+import service.PhoneBusinessSearcher;
 import service.RemoteBusinessFinder;
-import sun.net.www.http.HttpClient;
-
-import java.io.IOException;
-import java.net.URL;
-import java.sql.ClientInfoStatus;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -35,7 +27,7 @@ import java.util.Map;
 import static play.libs.Codec.hexMD5;
 
 
-public class YelpV2API implements YelpAPI, RemoteBusinessFinder {
+public class YelpV2API implements YelpAPI, RemoteBusinessFinder, PhoneBusinessSearcher {
     private static Gson gson = new GsonBuilder().setFieldNamingPolicy(FieldNamingPolicy.LOWER_CASE_WITH_UNDERSCORES).create();
 
     @Override
@@ -62,9 +54,8 @@ public class YelpV2API implements YelpAPI, RemoteBusinessFinder {
                              YelpSearchResult.class);
     }
 
-    private List<Business> findByPhone(String phone) {
-        /* Use phone number search here.
-        HttpRequest request = new BasicHttpRequest("GET", "/", HttpVersion.HTTP_1_1);
+    @Override
+    public List<Business> findByPhone(String phone) {
         String normalizedPhone;
         try {
             normalizedPhone = PhoneNumberUtil.getInstance().format(PhoneNumberUtil.getInstance().parse(phone, "US"),
@@ -72,26 +63,43 @@ public class YelpV2API implements YelpAPI, RemoteBusinessFinder {
         } catch (NumberParseException e) {
             normalizedPhone = phone;
         }
-        try {
-            HttpClient client = HttpClient.New(new URL("http://api.yelp.com/phone_search"));
-            client.
-        } catch (IOException e) {
-            Logger.warn("Failed to create httpclient.", e);
-            return null;
+        String cacheKey = "yelp_phone_" + hexMD5(normalizedPhone);
+        @SuppressWarnings("unchecked")
+        String resultString = Cache.get(cacheKey, String.class);
+        if (resultString == null) {
+            WS.HttpResponse response = WS.url("http://api.yelp.com/phone_search?phone=%s&ywsid=%s",
+                                              normalizedPhone, Play.configuration.getProperty("yelp.ywsid")).get();
+            resultString = response.getString();
+            Cache.set(cacheKey, resultString, "1440min");
         }
-        */
-        return new ArrayList<Business>();
+
+        JsonElement result = new JsonParser().parse(resultString);
+
+        List<Business> businesses = new ArrayList<Business>(1);
+        for (JsonElement element : result.getAsJsonObject().get("businesses").getAsJsonArray()) {
+            JsonObject object = element.getAsJsonObject();
+            YelpBusiness mBusiness = new YelpBusiness();
+            mBusiness.address = Joiner.on(", ").skipNulls().join(object.get("address1"), object.get("address2"), object.get("address3"));
+            mBusiness.city = object.get("city").getAsString();
+            mBusiness.latitude = object.get("latitude").getAsDouble();
+            mBusiness.longitude = object.get("longitude").getAsDouble();
+            mBusiness.name = object.get("name").getAsString();
+            mBusiness.phone = object.get("phone").getAsString();
+            mBusiness.state = object.get("state").getAsString();
+            mBusiness.zip = object.get("zip").getAsString();
+            mBusiness.childYelpId = mBusiness.yelpId = object.get("id").getAsString();
+            businesses.add(mBusiness);
+        }
+        return businesses;
     }
 
-
-
     @Override
-    public List<Business> findBusinessesByNameAndPhone(String name, double lat, double lng, int distance) {
+    public List<Business> findBusinessesByName(String name, double lat, double lng, int distance) {
         String cacheKey = "yelp_" +
                           hexMD5("" + lat + "," + lng + "," + distance + "," + name.toLowerCase().trim());
 
         @SuppressWarnings("unchecked")
-        List<Business> businesses = null; //Cache.get(cacheKey, List.class);
+        List<Business> businesses = Cache.get(cacheKey, List.class);
         if (businesses != null) {
             return businesses;
         }
@@ -99,7 +107,7 @@ public class YelpV2API implements YelpAPI, RemoteBusinessFinder {
         YelpSearchResult result = getYelpSearchResults(ImmutableMap.<String, String>of(
                 "term", name,
                 "radius_filter", String.valueOf(distance),
-                //"category_filter", "restaurants",
+                "category_filter", "restaurants",
                 "ll", Joiner.on(",").join(lat, lng),
                 "limit", "20"));
 
@@ -118,7 +126,6 @@ public class YelpV2API implements YelpAPI, RemoteBusinessFinder {
             mBusiness.childYelpId = business.getId();
             businesses.add(mBusiness);
         }
-        System.out.println(cacheKey);
         Cache.set(cacheKey, businesses, "1440mn");
         return businesses;
     }

@@ -32,7 +32,7 @@ INSERT INTO BusinessChain (name) VALUES ('Beefsteak Charlie\'s');
 INSERT INTO BusinessChain (name) VALUES ('Benihana of Toyko');
 INSERT INTO BusinessChain (name) VALUES ('Bennigan\'s Tavern');
 INSERT INTO BusinessChain (name) VALUES ('Bertolini\'s');
-INSERT INTO BusinessChain (name) VALUES ('Bertucci\'s Brick Oven Pizzeria');
+INSERT INTO BusinessChain (name) VALUES ('Bertucci\'s Italian Restaurant');
 INSERT INTO BusinessChain (name) VALUES ('Beverly Hills Cafe');
 INSERT INTO BusinessChain (name) VALUES ('Bickford\'s Family Fare');
 INSERT INTO BusinessChain (name) VALUES ('Big Boy');

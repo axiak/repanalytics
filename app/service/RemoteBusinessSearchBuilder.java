@@ -61,10 +61,17 @@ public final class RemoteBusinessSearchBuilder extends Job<List<F.Tuple<Double, 
     public List<F.Tuple<Double, Business>> search() {
         List<Double> coordinates = getCoordinates();
 
-        List<Business> results = service.findBusinessesByNameAndPhone(get("name"),
-                                                                      coordinates.get(0),
-                                                                      coordinates.get(1),
-                                                                      20);
+        if (get("phone") != null && service instanceof PhoneBusinessSearcher) {
+            List<Business> results = ((PhoneBusinessSearcher) service).findByPhone(get("phone"));
+            if (results.size() > 0) {
+                return sortResults(results);
+            }
+        }
+
+        List<Business> results = service.findBusinessesByName(get("name"),
+                coordinates.get(0),
+                coordinates.get(1),
+                20);
         return sortResults(results);
     }
 
