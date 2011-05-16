@@ -42,7 +42,6 @@ nav a {
   -webkit-box-shadow: $color $x $y $blur;
   -moz-box-shadow: $color $x $y $blur;
   box-shadow: $color $x $y $blur;
-  @include pie;
 }
 
 @mixin opacity($percentage) {
@@ -58,14 +57,12 @@ nav a {
   background: -moz-linear-gradient($colorTop, $colorBottom);
   background: linear-gradient($colorTop, $colorBottom);
   -pie-background: linear-gradient($colorTop, $colorBottom);
-  @include pie;
 }
 
 @mixin rounded-corners($radius) {
   -webkit-border-radius: $radius;
   -moz-border-radius: $radius;
   border-radius: $radius;
-  @include pie;
 }
 
 li {
@@ -101,6 +98,16 @@ html {
   @include shadow($gray, 3px, 3px, 6px);
   @include simple-gradient(#d5ecf9, $white);
   @include rounded-corners(10px);
+  @include pie;
+}
+
+input[type=submit], select, textarea, input[type=text] {
+  @include rounded-corners(5px);
+  @include shadow($gray, 1px, 1px, 2px);
+}
+
+input[type=text] {
+  height: 19px;
 }
 
 p {
@@ -182,6 +189,10 @@ nav {
 }
 
 nav ul {
+  position: relative;
+}
+
+nav ul {
   margin:  0;
   padding:  0;
   list-style-type: none;
@@ -212,7 +223,7 @@ nav ul li a {
 }
 
 #crunchtime-link {
-  top: auto;
+  top: -1px;
   position: absolute;
   right: 0px;
   margin:  0;
@@ -255,7 +266,7 @@ nav a.disabled {
 #business-info input, #business-info select {
   border: 1px solid #C5DBEC;
   padding: 5px;
-  font-size: 1.2em;
+  font-size: 16px;
   margin:  5px 0;
 }
 
@@ -296,7 +307,7 @@ h2.subtitle {
 #get-notified {
   border: 1px solid #C5DBEC;
   padding: 5px;
-  font-size: 1.2em;
+  font-size: 16px;
   margin:  5px 0;
   width: 300px;
 }

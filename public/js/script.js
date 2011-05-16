@@ -4,9 +4,6 @@ $(function () {
         e.preventDefault();
     });
 
-    var $crunchtimeLink = $("#crunchtime-link");
-    $crunchtimeLink.css({top: $crunchtimeLink.position().top - 1});
-
     $("#business-info").validate();
 
 
