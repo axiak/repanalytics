@@ -11,7 +11,7 @@ public final class ProbabilisticMatcher extends AbstractBusinessMatcher {
     Map<String, Double> weights = ImmutableMap.of(
             "name", 0.9,
             "phone", 1.0,
-            "address", 0.8
+            "address", 0.7
     );
     double defaultWeight = 0.52;
 

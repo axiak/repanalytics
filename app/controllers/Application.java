@@ -6,12 +6,6 @@ import play.libs.F;
 import play.mvc.*;
 
 import java.util.*;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Future;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
-
-import models.*;
 import service.RemoteBusinessSearchBuilder;
 import service.yelp.YelpV2API;
 
