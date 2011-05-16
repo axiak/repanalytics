@@ -1,4 +1,4 @@
-package service;
+package service.search;
 
 import com.google.common.base.Function;
 import com.google.i18n.phonenumbers.NumberParseException;
@@ -36,22 +36,5 @@ abstract public class AbstractBusinessMatcher implements Function<Business, F.Tu
             Logger.info(e, "Issue getting parameter from Business object.");
         }
         return "";
-    }
-
-    protected final String normalizeString(String input) {
-        if (input == null) {
-            return "";
-        } else {
-            return input.trim().toLowerCase(Locale.getDefault());
-        }
-    }
-
-    protected final String normalizePhone(String phone) {
-        try {
-            PhoneNumberUtil pnu = PhoneNumberUtil.getInstance();
-            return pnu.format(pnu.parse(phone, "US"), PhoneNumberUtil.PhoneNumberFormat.NATIONAL);
-        } catch (NumberParseException e) {
-            return normalizeString(phone);
-        }
     }
 }

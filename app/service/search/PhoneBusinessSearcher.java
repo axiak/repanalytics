@@ -1,4 +1,4 @@
-package service;
+package service.search;
 
 import models.businesses.Business;
 

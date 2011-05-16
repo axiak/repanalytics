@@ -14,12 +14,12 @@ import org.scribe.model.Response;
 import org.scribe.model.Token;
 import org.scribe.model.Verb;
 import org.scribe.oauth.OAuthService;
-import play.Logger;
 import play.Play;
 import play.cache.Cache;
 import play.libs.WS;
-import service.PhoneBusinessSearcher;
-import service.RemoteBusinessFinder;
+import service.search.PhoneBusinessSearcher;
+import service.search.RemoteBusinessFinder;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -80,8 +80,8 @@ public class YelpV2API implements YelpAPI, RemoteBusinessFinder, PhoneBusinessSe
             JsonObject object = element.getAsJsonObject();
             YelpBusiness mBusiness = new YelpBusiness();
             mBusiness.address = Joiner.on(", ").skipNulls().join(makeEmptyNull(object.get("address1").getAsString()),
-                                                                 makeEmptyNull(object.get("address2").getAsString()),
-                                                                 makeEmptyNull(object.get("address3").getAsString()));
+                    makeEmptyNull(object.get("address2").getAsString()),
+                    makeEmptyNull(object.get("address3").getAsString()));
             mBusiness.city = object.get("city").getAsString();
             mBusiness.latitude = object.get("latitude").getAsDouble();
             mBusiness.longitude = object.get("longitude").getAsDouble();

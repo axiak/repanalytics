@@ -1,11 +1,14 @@
-package service;
+package service.search;
 
 import com.google.common.collect.ImmutableMap;
 import models.businesses.Business;
 import play.Logger;
-import util.Levenshtein;
+import util.Strings;
 
 import java.util.Map;
+
+import static util.Strings.normalizeNoPunctuation;
+import static util.Strings.normalizePhone;
 
 public final class ProbabilisticMatcher extends AbstractBusinessMatcher {
     Map<String, Double> weights = ImmutableMap.of(
@@ -34,14 +37,13 @@ public final class ProbabilisticMatcher extends AbstractBusinessMatcher {
      */
     private double compareField(String key, String value, Business business) {
         String bValue = getBusinessField(business, key);
-        Logger.info("Comparing %s: %s <=> %s", key, value, bValue);
 
         if ("phone".equals(key)) {
             return normalizePhone(bValue).equals(normalizePhone(value)) ? 1 : 0;
         }
 
-        bValue = normalizeString(bValue);
-        value = normalizeString(value);
+        bValue = normalizeNoPunctuation(bValue);
+        value = normalizeNoPunctuation(value);
 
         if (bValue.equals(value)) {
             return 1;
@@ -49,7 +51,7 @@ public final class ProbabilisticMatcher extends AbstractBusinessMatcher {
 
         int denominator = bValue.length() > value.length() ? bValue.length() : value.length();
         // TODO - Use tf-idf rather than levenshtein? (with stopwords, etc)
-        Logger.info("Distance: %s", (1 - ((double)Levenshtein.getLevenshteinDistance(value, bValue)) / denominator));
-        return (1 - ((double)Levenshtein.getLevenshteinDistance(value, bValue)) / denominator);
+        Logger.info("Distance: %s", (1 - ((double)Strings.getLevenshteinDistance(value, bValue)) / denominator));
+        return (1 - ((double) Strings.getLevenshteinDistance(value, bValue)) / denominator);
     }
 }

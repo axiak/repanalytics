@@ -15,7 +15,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.*;
 
-import service.RemoteBusinessSearchBuilder;
+import service.search.RemoteBusinessSearchBuilder;
 import service.yelp.YelpV2API;
 
 import static com.google.common.collect.Collections2.transform;

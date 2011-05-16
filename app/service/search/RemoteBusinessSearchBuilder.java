@@ -1,4 +1,4 @@
-package service;
+package service.search;
 
 import com.google.code.geocoder.Geocoder;
 import com.google.code.geocoder.GeocoderRequestBuilder;
@@ -10,6 +10,7 @@ import com.google.common.base.Joiner;
 import com.google.common.collect.Collections2;
 import com.google.common.primitives.Doubles;
 import models.businesses.Business;
+import play.Logger;
 import play.cache.Cache;
 import play.jobs.Job;
 import play.libs.F;
@@ -17,6 +18,8 @@ import play.libs.F;
 import java.util.*;
 
 import static play.libs.Codec.hexMD5;
+import static util.Strings.normalizeNoPunctuation;
+import static util.Strings.normalizeSimple;
 
 public final class RemoteBusinessSearchBuilder extends Job<List<F.Tuple<Double, Business>>> {
     RemoteBusinessFinder service;
@@ -92,7 +95,10 @@ public final class RemoteBusinessSearchBuilder extends Job<List<F.Tuple<Double, 
     }
 
     private List<Double> getCoordinates() {
-        String addressLine = Joiner.on(", ").skipNulls().join(Arrays.asList(get("address"), get("city"), get("state")));
+        String addressLine = Joiner.on(", ").skipNulls().join(Arrays.asList(normalizeNoPunctuation(get("address")),
+                                                                            normalizeNoPunctuation(get("city")),
+                                                                            normalizeNoPunctuation(get("state"))));
+        Logger.info(addressLine);
         String cacheKey = "geocode_" + hexMD5(addressLine);
         @SuppressWarnings("unchecked")
         List<Double> result = Cache.get(cacheKey, List.class);
