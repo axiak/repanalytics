@@ -6,18 +6,18 @@
 </p>
 
 <fieldset>
-    <form action="" method="" name="business-info" id="business-info">
+    <form action="/demo/search/" method="" name="business-info" id="business-info">
         <input type="text" name="name" placeholder="Restaurant Name"
-               title="Restaurant Name" class="placeholder required" value="" id="demo-name" />
+               title="Restaurant Name" class="placeholder required" value="" id="demo-name">
         <br>
-        <input type="text" name="name" placeholder="Phone Number"
-                                       title="Phone Number" class="placeholder required" value="" />
+        <input type="text" name="phone" placeholder="Phone Number"
+                                       title="Phone Number" class="placeholder required" value="">
         <br>
-        <input type="text" name="name" placeholder=""
-                                       title="Phone Number" class="placeholder required" value="" />
+        <input type="text" name="address" placeholder="Street Address"
+                                       title="Street Address" class="placeholder required" value="">
         <br>
-        <input type="text" name="name" placeholder="City"
-                       title="Street Address" class="placeholder required" value="" />
+        <input type="text" name="city" placeholder="City"
+                       title="City" class="placeholder required" value="">
         <select class="required" name="state">
             <option value="">State</option>
             <option value="">-----</option>
@@ -26,7 +26,7 @@
             #{/list}
         </select>
         <input type="text" size="6" maxlength="5" name="zip" placeholder="Zip"
-                       title="Zip" class="placeholder required" value="" />
+                       title="Zip" class="placeholder required" value="">
 
         <br>
         <input type="checkbox" name="chain" id="chain"><label for="chain">This is a multi-unit restaurant chain.</label>

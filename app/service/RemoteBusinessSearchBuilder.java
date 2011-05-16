@@ -11,20 +11,16 @@ import com.google.common.collect.Collections2;
 import com.google.common.primitives.Doubles;
 import models.businesses.Business;
 import play.cache.Cache;
+import play.jobs.Job;
 import play.libs.F;
 
 import java.util.*;
-import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
 
 import static play.libs.Codec.hexMD5;
 
-public final class RemoteBusinessSearchBuilder {
+public final class RemoteBusinessSearchBuilder extends Job<List<F.Tuple<Double, Business>>> {
     RemoteBusinessFinder service;
     Map<String, String> searchParameters;
-    private final static ExecutorService executorService = Executors.newCachedThreadPool();
 
     public RemoteBusinessSearchBuilder(RemoteBusinessFinder service) {
         this.service = service;
@@ -72,13 +68,9 @@ public final class RemoteBusinessSearchBuilder {
         return sortResults(results);
     }
 
-    public Future<List<F.Tuple<Double, Business>>> searchAsync() {
-        return executorService.submit(new Callable<List<F.Tuple<Double, Business>>>(){
-            @Override
-            public List<F.Tuple<Double, Business>> call() throws Exception {
-                return search();
-            }
-        });
+    @Override
+    public List<F.Tuple<Double, Business>> doJobWithResult() throws Exception {
+        return search();
     }
 
     private List<F.Tuple<Double, Business>> sortResults(List<Business> results) {

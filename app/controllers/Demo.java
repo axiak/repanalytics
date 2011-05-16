@@ -1,5 +1,6 @@
 package controllers;
 
+import com.google.gson.reflect.TypeToken;
 import com.maxmind.geoip.Location;
 import com.maxmind.geoip.LookupService;
 import models.businesses.Business;
@@ -47,6 +48,7 @@ public class Demo extends Controller {
 
     public static void name(String term) {
         String cacheKey = "name_l_" + hexMD5(term);
+        @SuppressWarnings("unchecked")
         List<String> results = Cache.get(cacheKey, List.class);
         if (results == null) {
             List<BusinessChain> chains = BusinessChain.find("byNameIlike", "%" + term + "%").fetch();
@@ -63,15 +65,14 @@ public class Demo extends Controller {
         RemoteBusinessSearchBuilder rbsb = new RemoteBusinessSearchBuilder(new YelpV2API());
 
         List<F.Tuple<Double, Business>> businesses = await(rbsb
-                .name("Cheesecake Factory")
-                .city("Cambridge")
-                .address("100 Cambridgeside Place")
-                .state("MA")
-                .phone("6172523810")
-                .searchAsync());
+                .name(request.params.get("name"))
+                .city(request.params.get("city"))
+                .address(request.params.get("address"))
+                .state(request.params.get("state"))
+                .phone(request.params.get("phone"))
+                .now());
 
-        renderArgs.put("businesses", businesses);
-        render();
+        renderJSON(businesses, new TypeToken<List<F.Tuple<Double, Business>>>(){}.getType());
     }
 
 

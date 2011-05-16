@@ -5,7 +5,6 @@ $(function () {
     });
 
     var $crunchtimeLink = $("#crunchtime-link");
-    window.log($crunchtimeLink.position().top);
     $crunchtimeLink.css({top: $crunchtimeLink.position().top - 1});
 
     $("#business-info").validate();

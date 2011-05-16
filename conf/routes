@@ -6,6 +6,7 @@
 GET     /                                       Simple.index
 GET     /demo/                                  Demo.index
 GET     /demo/name/                             Demo.name
+GET     /demo/search/                           Demo.search
 
 # Map static resources from the /app/public folder to the /public path
 GET     /public/                                staticDir:public
