@@ -8,6 +8,7 @@ import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
 import com.yelp.v2.YelpSearchResult;
 import models.businesses.Business;
+import models.businesses.YelpBusiness;
 import org.scribe.builder.ServiceBuilder;
 import org.scribe.model.OAuthRequest;
 import org.scribe.model.Response;
@@ -77,7 +78,7 @@ public class YelpV2API implements YelpAPI, RemoteBusinessFinder {
 
         businesses = new ArrayList<Business>();
         for (com.yelp.v2.Business business : result.getBusinesses()) {
-            Business mBusiness = new Business();
+            YelpBusiness mBusiness = new YelpBusiness();
             mBusiness.address = Joiner.on(", ").skipNulls().join(business.getLocation().getAddress());
             mBusiness.city = business.getLocation().getCity();
             mBusiness.latitude = business.getLocation().getCoordinate().getLatitude();
@@ -86,6 +87,8 @@ public class YelpV2API implements YelpAPI, RemoteBusinessFinder {
             mBusiness.phone = business.getPhone();
             mBusiness.state = business.getLocation().getStateCode();
             mBusiness.zip = business.getLocation().getPostalCode();
+            mBusiness.yelpId = business.getId();
+            mBusiness.childYelpId = business.getId();
             businesses.add(mBusiness);
         }
         System.out.println(cacheKey);

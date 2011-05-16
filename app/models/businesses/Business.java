@@ -1,11 +1,14 @@
 package models.businesses;
 
-import com.google.common.base.Objects;
 import play.db.jpa.Model;
 
 import javax.persistence.Entity;
+import javax.persistence.Inheritance;
+
+import static javax.persistence.InheritanceType.JOINED;
 
 @Entity
+@Inheritance(strategy= JOINED)
 public class Business extends Model {
     public Double latitude;
     public Double longitude;
@@ -15,6 +18,11 @@ public class Business extends Model {
     public String state;
     public String zip;
     public String phone;
+    public String yelpId;
+    public String facebookId;
+    public String twitterId;
+    public String urbanspoonId;
+    public String tripAdvisorId;
 
     @Override
     public String toString() {

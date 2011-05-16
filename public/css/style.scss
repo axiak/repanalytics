@@ -51,6 +51,9 @@ $lightblue: #d5ecfa;
   @include pie;
 }
 
+li {
+    text-align: left;
+}
 
 * {
     color: $black;
