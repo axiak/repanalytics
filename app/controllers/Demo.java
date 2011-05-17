@@ -72,7 +72,11 @@ public class Demo extends Controller {
 
     public static void search() {
         RemoteBusinessSearchBuilder rbsb = new RemoteBusinessSearchBuilder(new YelpV2API());
-
+        for (String param : Arrays.asList("name", "city", "address", "state", "phone")) {
+            if (request.params.get(param) == null) {
+                redirect("/demo/");
+            }
+        }
         List<F.Tuple<Double, Business>> businesses = new ArrayList<F.Tuple<Double, Business>>(Collections2.filter(await(rbsb
                 .name(request.params.get("name"))
                 .city(request.params.get("city"))
