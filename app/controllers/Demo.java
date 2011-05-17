@@ -36,15 +36,11 @@ public class Demo extends Controller {
 
     private static void initializeGeoIp() {
         String path = new File(new File(Play.applicationPath, "dat"), "GeoIPCity.dat").getAbsolutePath();
-        Logger.info("GeoIP Data file: %s", path);
         try {
             geoIp = new LookupService(path, GEOIP_MEMORY_CACHE);
         } catch (IOException e) {
-            Logger.info("Could not open geoip service");
             Logger.info(e, "Could not open geoip service.");
         }
-
-        Logger.info("Geoip information: %s", geoIp);
     }
 
 
