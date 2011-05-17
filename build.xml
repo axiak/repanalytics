@@ -7,7 +7,9 @@ Or with PLAY_PATH environment variable:
     ant auto-test
 -->
 <project name="Meridian" basedir=".">
-
+    <property name="app.path" value="."/>
+    <tstamp><format property="ant.build.time" pattern="yyyyMMddhhmmss"/></tstamp>
+    <property file="localbuild.properties"/>
     <property name="play.default.path" value="/opt/play-1.2.1"/>
     <property environment="env"/>
     <condition property="play.path" value="${env.PLAY_PATH}">
@@ -17,11 +19,12 @@ Or with PLAY_PATH environment variable:
     <property name="play.path" value="${play.default.path}"/>
     <property name="war.dir" value="${java.io.tmpdir}/_repmanage"/>
     <property name="war.file" value="${dist.dir}/ROOT.war" />
-    <property name="version" value="00.00.00.01" />
 
     <property name="play.antify.path" value="${play.path}/modules/antify-1.0"/>
     <property name="test.start.delay" value="5"/>
     <import file="${play.antify.path}/application-build.xml"/>
+
+    <property name="deployment.base" value="${platform.home}/${version}/${tomcat.instance.name}"/>
 
     <target name="war" depends="clean">
         <delete dir="./out" />
@@ -51,7 +54,41 @@ Or with PLAY_PATH environment variable:
             <exclude name="**/*.java"/>
           </fileset>
         </war>
-
     </target>
 
+    <target name="tomcat-stop">
+        <exec executable="${deployment.base}/bin/catalina.sh" os="Linux">
+                <arg value="stop" />
+        </exec>
+        <exec executable="${deployment.base}/bin/catalina.sh" os="Linux">
+                <arg value="stop" />
+                <arg value="-force" />
+        </exec>
+    </target>
+
+    <target name="tomcat-kill">
+        <exec executable="perl">
+            <arg value="${app.path}/bin/killTomcat.pl"/>
+            <arg value="${deployment.base}"/>
+            <arg value="${tomcat.instance.name}"/>
+        </exec>
+    </target>
+
+    <target name="tomcat-start">
+        <exec executable="${deployment.base}/bin/catalina.sh" os="Linux">
+                <arg value="start" />
+        </exec>
+    </target>
+
+    <target name="deploy-war">
+        <delete dir="${deployment.base}/webapps/ROOT.bak"/>
+        <delete file="${deployment.base}/webapps/ROOT.war"/>
+        <move file="${deployment.base}/webapps/ROOT" todir="${deployment.base}/webapps/ROOT.bak" failonerror="false" />
+        <antcall target="tomcat-stop"/>
+        <antcall target="tomcat-kill"/>
+        <copy file="${war.file}" todir="${deployment.base}/webapps"/>
+        <antcall target="tomcat-start"/>
+    </target>
+
+    <target name="build-and-deploy" depends="war,deploy-war" />
 </project>

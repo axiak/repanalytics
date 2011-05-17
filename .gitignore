@@ -9,3 +9,4 @@ tmp/
 modules/
 repanalytics.iws
 *~
+localbuild.properties

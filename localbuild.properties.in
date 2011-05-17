@@ -1,0 +1,6 @@
+
+
+# Version number
+version=00.00.00.01
+tomcat.instance.name=meridian
+platform.home=/crunchtime/platform/application/enterprise

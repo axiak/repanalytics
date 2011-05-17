@@ -38,7 +38,7 @@ $(function () {
         })();
     }
 
-    $("#notified").click(function (e) {
+    $("#email-preview").submit(function (e) {
         var self = this;
         e.preventDefault();
         $.ajax({
@@ -48,7 +48,8 @@ $(function () {
                     success: function (data) {
                         self.disabled = "";
                         $(self).removeClass("disabled");
-                        $("#email-preview").replaceWith("<h4>Thank you!</h4>");
+                        $("#notify-form").fadeOut();
+                        $("#notify-thanks").fadeIn();
                     }
                 });
 

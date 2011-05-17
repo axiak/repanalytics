@@ -225,9 +225,14 @@ nav ul li a {
 #crunchtime-link {
   top: -1px;
   position: absolute;
-  right: 0px;
+  right: 0;
   margin:  0;
 }
+
+.ie7 #crunchtime-link {
+  left: 818px;
+}
+
 #crunchtime-link a {
   margin:  0;
 }
@@ -320,4 +325,19 @@ input:disabled {
 input.disabled {
   cursor: default;
   color: #BBB;
+}
+
+#notify-container {
+    position: relative;
+}
+
+.notify-block {
+    position: absolute;
+    top: 0;
+    left: 0;
+}
+
+#notify-thanks {
+    top: 8px;
+    left: 15px;
 }
