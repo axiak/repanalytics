@@ -40,9 +40,11 @@ public class Demo extends Controller {
         try {
             geoIp = new LookupService(path, GEOIP_MEMORY_CACHE);
         } catch (IOException e) {
-            Logger.error("Could not open geoip service");
-            Logger.error(e, "Could not open geoip service.");
+            Logger.info("Could not open geoip service");
+            Logger.info(e, "Could not open geoip service.");
         }
+
+        Logger.info("Geoip information: %s", geoIp);
     }
 
 
