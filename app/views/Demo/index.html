@@ -1,11 +1,18 @@
 #{extends 'main.html' /}
 #{set title:'Demo' /}
+#{set 'moreScripts'}
+#{script 'mylibs/demo.js' /}
+#{/set}
 
+
+<div id="subcontainer">
+<div id="demo-form-panel">
 <p>
     Get real-time information about your business. Free.
 </p>
 
 <fieldset>
+  <p class="error" style="display: none;" id="business-info-errors"></p>
     <form action="/demo/search/" method="" name="business-info" id="business-info">
       <span class="require-info">*</span>
       <input type="text" name="name" placeholder="Restaurant Name"
@@ -25,7 +32,7 @@
               <option value="${state}"${currentState == state ? " selected" : ""}>${state}</option>
             #{/list}
       </select>
-      <input type="text" size="6" maxlength="5" name="zip" placeholder="Zip"
+      <input type="text" size="6" maxlength="5" name="zip" id="demo-zip" placeholder="Zip"
                      title="Zip" class="placeholder required" value="">
 
       <br>
@@ -33,8 +40,13 @@
       <input type="text" name="phone" placeholder="Phone Number" id="demo-phone"
                                      title="Phone Number" class="placeholder" value="">
       <br>
-      <input type="checkbox" name="chain" id="chain"><label for="chain">This is a multi-unit restaurant chain.</label>
+      <p id="chain-container">
+          <input type="checkbox" name="chain" id="chain"><label for="chain">This is a multi-unit restaurant chain.</label>
+      </p>
       <br>
       <input type="submit" name="go" id="go" value="Go">
+      <input type="hidden" name="existingChain" id="existingChain" value=""/>
     </form>
 </fieldset>
+</div>
+</div>

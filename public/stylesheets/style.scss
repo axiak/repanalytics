@@ -17,13 +17,14 @@ $darkgray: #999;
 $offwhite: #fffffc;
 $lightblue: #d5ecfa;
 $borderBlue: #C5DBEC;
+$errorColor: #c00;
 
 h1, h2, h3, h4 {
   font-family: "UbuntuBold", "Verdana", "Lucida Grande", "Gill Sans", "Arial", "Helvetica", sans-serif;
 }
 
 h5, h6, p, span, a, footer, header, address, cite, code, del, ins {
-  font-family: "Andron Freefont LAT", "Hoefler Text", "Baskerville", "Palatino", "Georgia", "Times New Roman", serif; font-size: 1.167em;
+  font-family: /*"Andron Freefont LAT",*/ "Hoefler Text", "Baskerville", "Palatino", "Georgia", "Times New Roman", serif; font-size: 1.167em;
 }
 
 tt, pre, code {
@@ -35,7 +36,7 @@ nav a {
 }
 
 @mixin pie {
-  behavior: url(/public/css/PIE.htc);
+  behavior: url(/public/stylesheets/PIE.htc);
 }
 
 @mixin shadow($color, $x, $y, $blur) {
@@ -63,6 +64,10 @@ nav a {
   -webkit-border-radius: $radius;
   -moz-border-radius: $radius;
   border-radius: $radius;
+}
+
+p {
+  margin:  9px;
 }
 
 li {
@@ -110,8 +115,17 @@ input[type=text] {
   height: 19px;
 }
 
+.error {
+  color: #C00;
+  font-style: italic;
+}
+
+label.error {
+  font-size: 0.8em;
+}
+
 p {
-  font-size: 1.13em;
+  font-size: 1.3em;
 }
 
 h1, h2, h3, h4, h5, h6 {
@@ -286,10 +300,30 @@ nav a.disabled {
 
 #business-info #demo-phone {
   margin-left: 11px;
+  width: 190px;
 }
 
 #business-info #demo-city {
   width: 325px;
+}
+
+#business-info #demo-zip {
+  width: 90px;
+}
+
+#chain-container {
+  margin-left: 10px;
+  margin-top: 5px;
+}
+
+#chain-container input {
+  padding: 5px;
+  vertical-align: 0%;
+  border:  none;
+}
+
+#chain-container label {
+  padding-left: 5px;
 }
 
 .yui-g {
@@ -340,4 +374,25 @@ input.disabled {
 #notify-thanks {
     top: 8px;
     left: 15px;
+}
+
+#subcontainer {
+  width: 100%;
+  margin:  0;
+  padding:  0;
+}
+
+p.loading {
+  margin:  auto;
+  width: 64px;
+  height: 110px;
+  display: block;
+  padding-top: 65px;
+  font-style: italic;
+  text-align: center;
+  background:  url("../img/loading.gif") no-repeat center top;
+  position: absolute;
+  left: 445px;
+  top: 270px;
+
 }

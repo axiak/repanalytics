@@ -17,16 +17,14 @@
   *{<link rel="shortcut icon" href="@{'/public/favicon.ico'}">}*
   *{<link rel="apple-touch-icon" href="@{'public/apple-touch-icon.png'}">}*
 
-  <link rel="stylesheet" href="@{'public/css/fonts.css'}">
-  <link rel="stylesheet" href="@{'public/css/reset.css'}">
-  <link rel="stylesheet" href="@{'public/css/yui-reset-fonts-grids.css'}">
-  <link rel="stylesheet" href="@{'public/css/redmond/jquery-ui-1.8.12.custom.css'}">
-  <link rel="stylesheet" href="@{'public/css/style.scss'}">
+  <link rel="stylesheet" href="@{'public/stylesheets/fonts.css'}">
+  <link rel="stylesheet" href="@{'public/stylesheets/reset.css'}">
+  <link rel="stylesheet" href="@{'public/stylesheets/yui-reset-fonts-grids.css'}">
+  <link rel="stylesheet" href="@{'public/stylesheets/redmond/jquery-ui-1.8.12.custom.css'}">
+  <link rel="stylesheet" href="@{'public/stylesheets/style.scss'}">
   #{get 'moreStyles' /}
 
-  <script src="@{'public/js/libs/modernizr-1.7.min.js'}"></script>
-  #{get 'moreScripts' /}
-
+  #{script 'libs/modernizr-1.7.min.js' /}
 </head>
 
 <body class="yui-skin-sam">
@@ -57,21 +55,23 @@
     </div>
   </div>
   <script src="//ajax.googleapis.com/ajax/libs/jquery/1.5.1/jquery.js"></script>
-  <script>window.jQuery || document.write("<script src='@{'/public/js/libs/jquery-1.5.2.min.js'}'>\x3C/script>")</script>
-  <script src="@{'public/js/libs/jquery-ui-1.8.12.custom.min.js'}"></script>
-  <script src="@{'public/js/libs/jquery.validate.min.js'}"></script>
-  <script src="@{'public/js/libs/jquery.livequery.js'}"></script>
-  <script src="@{'public/js/libs/jquery.placeholder.js'}"></script>
+  <script>window.jQuery || document.write("<script src='@{'/public/javascripts/libs/jquery-1.5.2.min.js'}'>\x3C/script>")</script>
+  #{script 'libs/jquery-ui-1.8.12.custom.min.js' /}
+  #{script 'libs/jquery.validate.min.js' /}
+  #{script 'libs/jquery.livequery.js' /}
+  #{script 'libs/jquery.placeholder.js' /}
 
-  <script src="@{'public/js/plugins.js'}"></script>
-  <script src="@{'public/js/script.js'}"></script>
+  #{script 'plugins.js' /}
+  #{script 'script.js' /}
+
+  #{get 'moreScripts' /}
 
   <!--[if lt IE 7 ]>
-    <script type="text/javascript" src="@{'public/js/libs/dd_belatedpng.js'}"></script>
+    <script type="text/javascript" src="@{'public/javascripts/libs/dd_belatedpng.js'}"></script>
     <script type="text/javascript">DD_belatedPNG.fix(".png_bg");</script>
   <![endif]-->
 
-  <script>
+  <script type="text/javascript">
       /* TODO - Set google analytics code.
     var _gaq=[["_setAccount","UA-XXXXX-X"],["_trackPageview"]];
     (function(d,t){var g=d.createElement(t),s=d.getElementsByTagName(t)[0];g.async=1;

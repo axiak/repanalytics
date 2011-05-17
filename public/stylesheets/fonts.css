@@ -75,8 +75,8 @@ font-style: italic;
 
 @font-face {
 font-family: 'Andron Freefont LAT';
-src: url('../fonts');
-src: local('☺'), url('../fonts') format('woff'), url('../fonts/Andron Freefont LAT Reg.ttf') format('truetype'), url('../fonts#webfontX4pGz9fc') format('svg');
+src: url('../fonts/andron_freefont_lat_reg-webfont.eot');
+src: local('☺'), url('../fonts/andron_freefont_lat_reg-webfont.woff') format('woff'), url('../fonts/andron_freefont_lat_reg-webfont.ttf') format('truetype'), url('../fonts/andron_freefont_lat_reg-webfont.svg#webfontX4pGz9fc') format('svg');
 font-weight: 400;
 font-style: normal;
 }

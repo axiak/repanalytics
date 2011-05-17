@@ -1,6 +1,10 @@
 package controllers;
 
 import bootstrap.JmxInitialization;
+import com.google.common.base.Predicate;
+import com.google.common.collect.Collections2;
+import com.google.common.collect.ImmutableMap;
+import com.google.gson.JsonElement;
 import com.google.gson.reflect.TypeToken;
 import com.maxmind.geoip.Location;
 import com.maxmind.geoip.LookupService;
@@ -18,6 +22,8 @@ import java.util.*;
 
 import service.search.RemoteBusinessSearchBuilder;
 import service.yelp.YelpV2API;
+
+import javax.annotation.Nullable;
 
 import static com.google.common.collect.Collections2.transform;
 import static com.maxmind.geoip.LookupService.GEOIP_MEMORY_CACHE;
@@ -67,16 +73,34 @@ public class Demo extends Controller {
     public static void search() {
         RemoteBusinessSearchBuilder rbsb = new RemoteBusinessSearchBuilder(new YelpV2API());
 
-        List<F.Tuple<Double, Business>> businesses = await(rbsb
+        List<F.Tuple<Double, Business>> businesses = new ArrayList<F.Tuple<Double, Business>>(Collections2.filter(await(rbsb
                 .name(request.params.get("name"))
                 .city(request.params.get("city"))
                 .address(request.params.get("address"))
                 .state(request.params.get("state"))
                 .phone(request.params.get("phone"))
-                .now());
+                .now()), new Predicate<F.Tuple<Double, Business>>() {
+            @Override
+            public boolean apply(@Nullable F.Tuple<Double, Business> doubleBusinessTuple) {
+                return doubleBusinessTuple != null && doubleBusinessTuple._1 > 0.9;
+            }
+        }));
 
-        renderJSON(businesses, new TypeToken<List<F.Tuple<Double, Business>>>(){}.getType());
+        if (businesses.size() == 0) {
+            renderJSON(ImmutableMap.<String, String>of("status", "notfound"), new TypeToken<Map<String, String>>(){}.getType());
+            return;
+        }
+
+        if (businesses.get(0) != null && Math.abs(businesses.get(0)._1 - 1.000) < 0.00001) {
+            demoInformation(businesses.get(0)._2);
+            return;
+        }
+
+        renderJSON(ImmutableMap.<String, Object>of("status", "disambiguate", "businesses", businesses),
+                   new TypeToken<Map<String, Object>>() {}.getType());
     }
 
-
+    private static void demoInformation(Business business) {
+        renderJSON("BOO");
+    }
 }
