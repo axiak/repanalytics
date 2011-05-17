@@ -10,7 +10,7 @@ Or with PLAY_PATH environment variable:
     <property name="app.path" value="."/>
     <tstamp><format property="ant.build.time" pattern="yyyyMMddhhmmss"/></tstamp>
     <property file="localbuild.properties"/>
-    <property name="play.default.path" value="/opt/play-1.2.1"/>
+    <property name="play.default.path" value="/opt/play"/>
     <property environment="env"/>
     <condition property="play.path" value="${env.PLAY_PATH}">
         <isset property="env.PLAY_PATH"/>
