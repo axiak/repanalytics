@@ -29,6 +29,7 @@ import java.util.Map;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static play.libs.Codec.hexMD5;
+import static util.Strings.normalizePhone;
 
 
 public class YelpV2API implements YelpAPI, RemoteBusinessFinder, PhoneBusinessSearcher {
@@ -96,7 +97,7 @@ public class YelpV2API implements YelpAPI, RemoteBusinessFinder, PhoneBusinessSe
             mBusiness.latitude = object.get("latitude").getAsDouble();
             mBusiness.longitude = object.get("longitude").getAsDouble();
             mBusiness.name = object.get("name").getAsString();
-            mBusiness.phone = object.get("phone").getAsString();
+            mBusiness.phone = normalizePhone(object.get("phone").getAsString());
             mBusiness.state = object.get("state").getAsString();
             mBusiness.zip = object.get("zip").getAsString();
             mBusiness.childYelpId = mBusiness.yelpId = object.get("id").getAsString();
@@ -131,7 +132,7 @@ public class YelpV2API implements YelpAPI, RemoteBusinessFinder, PhoneBusinessSe
             mBusiness.latitude = business.getLocation().getCoordinate().getLatitude();
             mBusiness.longitude = business.getLocation().getCoordinate().getLongitude();
             mBusiness.name = business.getName();
-            mBusiness.phone = business.getPhone();
+            mBusiness.phone = normalizePhone(business.getPhone());
             mBusiness.state = business.getLocation().getStateCode();
             mBusiness.zip = business.getLocation().getPostalCode();
             mBusiness.yelpId = business.getId();

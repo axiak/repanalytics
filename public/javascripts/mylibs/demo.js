@@ -20,9 +20,9 @@ Demo.runDemo = function (data) {
         data: data,
         success: function (response) {
           Demo.$loading.fadeOut(Demo.fadeTime);
-          if (response.status && response.status === "notfound") {
+          if (response._1 && response._1 === "notfound") {
             return Demo.notfound(data);
-          } else if (response.status && response.status == "disambiguate") {
+          } else if (response._1 && response._1 === "disambiguate") {
             return Demo.disambiguate(data, response);
           } else {
             return Demo.demoInfo(data, response);
@@ -53,7 +53,7 @@ Demo.notfound = function (inputData) {
  * select against.
  */
 Demo.disambiguate = function (inputData, response) {
-
+  console.log(response._2);
 };
 
 /*
@@ -61,6 +61,14 @@ Demo.disambiguate = function (inputData, response) {
  */
 Demo.demoInfo = function (inputData, response) {
 
+};
+
+/*
+ * Given a business object, return an img jquery object of
+ * the map.
+ */
+Demo.mapImg = function (business) {
+  //http://maps.google.com/maps/api/staticmap?center=42.367101,-71.076376&zoom=16&size=128x128&maptype=roadmap&markers=color:blue%7Clabel:Cheesecake+Factory%7C42.367101,-71.076376&sensor=false
 };
 
 $(function () {

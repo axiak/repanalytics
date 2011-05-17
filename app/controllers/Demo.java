@@ -87,7 +87,7 @@ public class Demo extends Controller {
         }));
 
         if (businesses.size() == 0) {
-            renderJSON(ImmutableMap.<String, String>of("status", "notfound"), new TypeToken<Map<String, String>>(){}.getType());
+            renderJSON(new F.Tuple<String, String>("notfound", ""), new TypeToken<F.Tuple<String, String>>(){}.getType());
             return;
         }
 
@@ -96,8 +96,8 @@ public class Demo extends Controller {
             return;
         }
 
-        renderJSON(ImmutableMap.<String, Object>of("status", "disambiguate", "businesses", businesses),
-                   new TypeToken<Map<String, Object>>() {}.getType());
+        renderJSON(new F.Tuple<String, List<F.Tuple<Double, Business>>>("disambiguate", businesses),
+                   new TypeToken<F.Tuple<String, List<F.Tuple<Double, Business>>>>() {}.getType());
     }
 
     private static void demoInformation(Business business) {

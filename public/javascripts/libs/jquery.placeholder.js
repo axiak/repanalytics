@@ -15,7 +15,6 @@
  * <input type="text" class="placeholder" title="Username" placeholder="Username" name="username">
  */
 $.fn.isInputEmpty = function () {
-  console.log($.trim($(this).val()));
   return $.trim($(this).val()) === "";
 };
 
@@ -24,8 +23,8 @@ $.fn.isInputEmpty = function () {
 
   if (!Modernizr.input.placeholder) {
     $.fn.isInputEmpty = function () {
-      var trimmedValue = $.trim($(this).val());
-      return (trimmedValue === "" || trimmedValue === $.trim(this.title));
+      var trimmedValue = $.trim(this.val());
+      return (trimmedValue === "" || trimmedValue === $.trim(this[0].title));
     };
     $(function() {
 
