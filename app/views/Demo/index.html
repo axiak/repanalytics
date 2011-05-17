@@ -30,7 +30,7 @@
             <option value="">-----</option>
             #{list items:states, as:'state' }
               <option value="${state}"${currentState == state ? " selected" : ""}>${state}</option>
-            #{/list}
+            #{/list}         `
       </select>
       <input type="text" size="6" maxlength="5" name="zip" id="demo-zip" placeholder="Zip"
                      title="Zip" class="placeholder required" value="">
@@ -50,3 +50,10 @@
 </fieldset>
 </div>
 </div>
+
+<script id="disambiguate-business" type="text/x-jquery-tmpl">
+  <div class="business">
+    <h4>\${name}</h4>
+    \${Demo.asdfasf}
+  </div>
+</script>

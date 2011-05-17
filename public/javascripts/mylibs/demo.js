@@ -67,8 +67,18 @@ Demo.demoInfo = function (inputData, response) {
  * Given a business object, return an img jquery object of
  * the map.
  */
-Demo.mapImg = function (business) {
-  //http://maps.google.com/maps/api/staticmap?center=42.367101,-71.076376&zoom=16&size=128x128&maptype=roadmap&markers=color:blue%7Clabel:Cheesecake+Factory%7C42.367101,-71.076376&sensor=false
+Demo.mapImg = function (business, height, width) {
+  if (typeof(width) === "undefined") {
+    width = 128;
+  }
+  if (typeof(height) === "undefined") {
+    height = 128;
+  }
+  var $img = $("<img width='" + width + "' height='" + height + "' border=0 class='business-map' />");
+  $img.attr({"src": "http://maps.google.com/maps/api/staticmap?center=" + business.latitude + "," + business.longitude +
+                    "&zoom=14&size=" + width + "x" + height + "&maptype=roadmap&markers=color:blue%7Clabel:" + encodeURIComponent(business.name) +
+                    "%7C" + business.latitude + "," + business.longitude + "&sensor=false"});
+  return $img;
 };
 
 $(function () {

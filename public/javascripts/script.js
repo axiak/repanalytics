@@ -79,21 +79,9 @@ $(function () {
     this.disabled = "disabled";
     $(this).addClass("disabled");
   });
+
+  $("#slideshow").cycle({
+        speed: 500
+      });
 });
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
