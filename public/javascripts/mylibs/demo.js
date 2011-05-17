@@ -5,8 +5,11 @@ Demo.$subcontainer = null;
 Demo.$formpanel = null;
 Demo.$formerrors = null;
 Demo.fadeTime = 250;
+Demo.searchHref = "/demo/search/";
+Demo.$results = null;
 
 Demo.initialize = function () {
+  Demo.$results = $("#demo-results");
   Demo.$formerrors = $("#business-info-errors");
   Demo.$subcontainer = $("#subcontainer");
   Demo.$formpanel = $("#demo-form-panel");
@@ -15,7 +18,7 @@ Demo.initialize = function () {
 
 Demo.runDemo = function (data) {
   $.ajax({
-        url: "/demo/search/",
+        url: Demo.searchHref,
         type: "GET",
         data: data,
         success: function (response) {
@@ -29,6 +32,10 @@ Demo.runDemo = function (data) {
           }
         }
       });
+  if (Modernizr.history) {
+    history.pushState(null, null, Demo.searchHref);
+    $(window).bind("popstate", Demo.popstate);
+  }
   Demo.$subcontainer.append(Demo.$loading);
   Demo.$formpanel.fadeOut(Demo.fadeTime);
   Demo.$formerrors.hide();
@@ -53,7 +60,14 @@ Demo.notfound = function (inputData) {
  * select against.
  */
 Demo.disambiguate = function (inputData, response) {
-  console.log(response._2);
+  if (response._2.length > 1) {
+    Demo.$results.html("<p>The following businesses match your search. Please continue by selecting your business.</p>");
+  } else {
+    Demo.$results.html("<p>The following business matches your search, but wasn't an exact match. Please confirm that this is your business.</p>");
+  }
+
+  $("#disambiguate-business").tmpl($.map(response._2, function (_) {return _._2;})).appendTo(Demo.$results);
+  Demo.$results.fadeIn(Demo.fadeTime);
 };
 
 /*
@@ -63,23 +77,17 @@ Demo.demoInfo = function (inputData, response) {
 
 };
 
-/*
- * Given a business object, return an img jquery object of
- * the map.
- */
-Demo.mapImg = function (business, height, width) {
-  if (typeof(width) === "undefined") {
-    width = 128;
+
+Demo.popstate = function (e) {
+  console.log(location.href.path);
+  if (location.pathname === "/demo/") {
+    Demo.$results.hide();
+    Demo.$formpanel.show();
+    Demo.$loading.hide();
   }
-  if (typeof(height) === "undefined") {
-    height = 128;
-  }
-  var $img = $("<img width='" + width + "' height='" + height + "' border=0 class='business-map' />");
-  $img.attr({"src": "http://maps.google.com/maps/api/staticmap?center=" + business.latitude + "," + business.longitude +
-                    "&zoom=14&size=" + width + "x" + height + "&maptype=roadmap&markers=color:blue%7Clabel:" + encodeURIComponent(business.name) +
-                    "%7C" + business.latitude + "," + business.longitude + "&sensor=false"});
-  return $img;
 };
+
+
 
 $(function () {
   Demo.initialize();

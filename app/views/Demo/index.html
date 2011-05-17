@@ -6,6 +6,7 @@
 
 
 <div id="subcontainer">
+<div id="demo-results"></div>
 <div id="demo-form-panel">
 <p>
     Get real-time information about your business. Free.
@@ -53,7 +54,19 @@
 
 <script id="disambiguate-business" type="text/x-jquery-tmpl">
   <div class="business">
-    <h4>\${name}</h4>
-    \${Demo.asdfasf}
+    <div class="left-side">
+      <h4>{{= name}}</h4>
+      <p>
+        {{= address }} <br>
+        {{= city }}, {{= state }} {{= zip }} <br>
+        {{= phone }}
+      </p>
+    </div>
+    {{tmpl "#business-map-image"}}
+    <span style="clear: both"></span>
   </div>
+</script>
+
+<script id="business-map-image" type="text/x-jquery-tmpl">
+  <img width="96" height=96 border=0 class='business-map' src="http://maps.google.com/maps/api/staticmap?center={{= latitude}},{{= longitude}}&zoom=13&size=96x96&maptype=roadmap&markers=color:blue%7Clabel:{{= encodeURIComponent(name) }}%7C{{= latitude}},{{= longitude}}&sensor=false">
 </script>

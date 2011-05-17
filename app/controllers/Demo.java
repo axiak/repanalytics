@@ -36,9 +36,11 @@ public class Demo extends Controller {
 
     private static void initializeGeoIp() {
         String path = new File(new File(Play.applicationPath, "dat"), "GeoIPCity.dat").getAbsolutePath();
+        Logger.info("GeoIP Data file: %s", path);
         try {
             geoIp = new LookupService(path, GEOIP_MEMORY_CACHE);
         } catch (IOException e) {
+            Logger.error("Could not open geoip service");
             Logger.error(e, "Could not open geoip service.");
         }
     }
@@ -82,7 +84,7 @@ public class Demo extends Controller {
                 .now()), new Predicate<F.Tuple<Double, Business>>() {
             @Override
             public boolean apply(@Nullable F.Tuple<Double, Business> doubleBusinessTuple) {
-                return doubleBusinessTuple != null && doubleBusinessTuple._1 > 0.9;
+                return doubleBusinessTuple != null && doubleBusinessTuple._1 > 0.7;
             }
         }));
 

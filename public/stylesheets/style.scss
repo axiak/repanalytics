@@ -401,5 +401,33 @@ p.loading {
   position: absolute;
   left: 445px;
   top: 270px;
+}
 
+#demo-results {
+  display: none;
+  position: absolute;
+  top: 224px;
+}
+
+#demo-results .business {
+  width: 416px;
+  border: 1px solid $borderBlue;
+  margin: 5px 0 0 30px;
+  height: 105px;
+  padding:  8px;
+  @include rounded-corners(3px);
+  @include shadow($borderBlue, 2px, 2px, 3px);
+}
+
+#demo-results .business p {
+  font-size: 1.1em;
+}
+
+#demo-results .business .left-side {
+  float: left;
+  width: 308px;
+}
+
+#demo-results .business img {
+  float: right;
 }
