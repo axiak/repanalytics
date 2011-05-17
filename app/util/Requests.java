@@ -11,12 +11,11 @@ public final class Requests {
         if (forwardedFor == null) {
             ip = request.remoteAddress;
         } else {
-            ip = forwardedFor.value();
+            ip = forwardedFor.value().split(",")[0];
         }
         if (ip.startsWith("127.") || ip.startsWith("192.168.")) {
             ip = Play.configuration.getProperty("test.ip.address", "209.113.164.2");
         }
-        Logger.info("Remote IP Address: %s", ip);
         return ip;
     }
 }
