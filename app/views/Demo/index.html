@@ -70,3 +70,13 @@
 <script id="business-map-image" type="text/x-jquery-tmpl">
   <img width="96" height=96 border=0 class='business-map' src="http://maps.google.com/maps/api/staticmap?center={{= latitude}},{{= longitude}}&zoom=13&size=96x96&maptype=roadmap&markers=color:blue%7Clabel:{{= encodeURIComponent(name) }}%7C{{= latitude}},{{= longitude}}&sensor=false">
 </script>
+
+<script id="review-tmpl" type="text/x-jquery-tmpl">
+  <div class="review">
+    <h4>Rating: {{= rating }}</h4>
+    <h4>Sentiment: {{= sentiment }}</h4>
+    <span class="review-text">
+      {{= text }}
+    </span>
+  </div>
+</script>

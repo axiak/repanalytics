@@ -8,6 +8,7 @@ import com.maxmind.geoip.Location;
 import com.maxmind.geoip.LookupService;
 import models.businesses.Business;
 import models.businesses.BusinessChain;
+import models.businesses.Review;
 import models.businesses.YelpBusiness;
 import play.Logger;
 import play.Play;
@@ -19,6 +20,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.*;
 
+import service.reviews.ReviewFinderService;
 import service.search.RemoteBusinessSearchBuilder;
 import service.yelp.YelpV2API;
 
@@ -107,7 +109,9 @@ public class Demo extends Controller {
     }
 
     private static void demoInformation(Business business) {
-        renderJSON("BOO");
+        ReviewFinderService service = new ReviewFinderService(new YelpV2API(), business);
+        List<Review> reviews = await(service.now()).get(business);
+        renderJSON(reviews);
     }
 
 

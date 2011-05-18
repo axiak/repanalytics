@@ -87,6 +87,9 @@ Demo.disambiguate = function (inputData, response) {
           Demo.demoInfo(response);
         }
       });
+      Demo.$loading.fadeIn(Demo.fadeTime);
+      Demo.$results.fadeOut(Demo.fadeTime, function () {Demo.$results.html('');});
+
     });
 
   var backLinks = ["This is not my business.", "Neither of these businesses are mine.", "None of these businesses are mine."];
@@ -111,7 +114,9 @@ Demo.disambiguate = function (inputData, response) {
  * We have data for a business. We have to show it now.
  */
 Demo.demoInfo = function (response) {
-
+  Demo.$results.html('');
+  $("#review-tmpl").tmpl(response).appendTo(Demo.$results);
+  Demo.$results.fadeIn(Demo.fadeTime);
 };
 
 

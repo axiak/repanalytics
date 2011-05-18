@@ -20,19 +20,19 @@ import play.Play;
 import play.cache.Cache;
 import play.libs.F;
 import play.libs.WS;
+import service.ReviewSource;
+import service.reviews.ReviewFetcher;
 import service.search.PhoneBusinessSearcher;
 import service.search.RemoteBusinessFinder;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
+import javax.annotation.Nonnull;
+import java.util.*;
 
-import static com.google.common.base.Preconditions.checkNotNull;
 import static play.libs.Codec.hexMD5;
 import static util.Strings.normalizePhone;
 
 
-public class YelpV2API implements YelpAPI, RemoteBusinessFinder, PhoneBusinessSearcher {
+public class YelpV2API implements YelpAPI, RemoteBusinessFinder, PhoneBusinessSearcher, ReviewFetcher {
     private static Gson gson = new GsonBuilder().setFieldNamingPolicy(FieldNamingPolicy.LOWER_CASE_WITH_UNDERSCORES).create();
 
     private F.Tuple<OAuthService, Token> getYelpOAuthInfo() {
@@ -151,21 +151,46 @@ public class YelpV2API implements YelpAPI, RemoteBusinessFinder, PhoneBusinessSe
         }
     }
 
-
-    public List<Review> getReviews(Business business) {
+    @Override
+    public List<Review> getReviews(@Nonnull Business business) {
         if (business.yelpId == null) {
             return new ArrayList<Review>();
         }
-        F.Tuple<OAuthService, Token> oAuthInfo = getYelpOAuthInfo();
+        String response = Cache.get("yelp_reviews_" + business.yelpId, String.class);
+        if (response == null) {
+            F.Tuple<OAuthService, Token> oAuthInfo = getYelpOAuthInfo();
+            OAuthRequest request = new OAuthRequest(Verb.GET,
+                    "http://api.yelp.com/v2/business/" + business.yelpId);
+            oAuthInfo._1.signRequest(oAuthInfo._2, request);
 
-        OAuthRequest request = new OAuthRequest(Verb.GET,
-                "http://api.yelp.com/v2/business/" + business.yelpId);
+            response = request.send().getBody();
+        }
 
-        oAuthInfo._1.signRequest(oAuthInfo._2, request);
+        Cache.set("yelp_reviews_" + business.yelpId, response, "1440mn");
 
-        Response response = request.send();
+        JsonElement element = new JsonParser().parse(response);
 
-        Logger.debug("Response: %s", response.getBody());
-        return new ArrayList<Review>();
+        JsonArray jsonReviews = element.getAsJsonObject().get("reviews").getAsJsonArray();
+        List<Review> reviews = new ArrayList<Review>();
+
+        for (JsonElement reviewElement : jsonReviews) {
+            JsonObject reviewObject = reviewElement.getAsJsonObject();
+            Review review = new Review();
+            review.business = business;
+            try {
+                review.date = new Date(1000L * reviewObject.get("time_created").getAsInt());
+                review.rating = reviewObject.get("rating").getAsInt();
+                review.text = reviewObject.get("excerpt").getAsString();
+                review.userName = reviewObject.get("user").getAsJsonObject().get("name").getAsString();
+                review.source = ReviewSource.YELP;
+            } catch (NullPointerException e) {
+                Logger.info(e, "");
+                Logger.info("Failed to parse json response from yelp for business %s: %s", business.id, response);
+                continue;
+            }
+            reviews.add(review);
+        }
+
+        return reviews;
     }
 }

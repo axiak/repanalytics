@@ -12,3 +12,4 @@ require:
     - junit -> junit 4.8.2
     - org.apache.poi -> poi 3.7
     - com.restfb -> restfb 1.6.4
+    - org.apache.opennlp -> opennlp-tools 1.5.1-incubating

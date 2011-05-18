@@ -21,6 +21,6 @@ public class SeedUser extends Model {
         if (insertDate == null) {
             insertDate = new Date();
         }
-        return super.save();
+        return super.<T>save();
     }
 }

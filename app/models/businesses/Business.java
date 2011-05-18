@@ -65,6 +65,9 @@ public class Business extends Model {
             else if (this.tripAdvisorId != null) {
                 return TripAdvisorBusiness.find("byChildTripAdvisorId", this.tripAdvisorId).<Business>first();
             }
+            else if (this.twitterId != null) {
+                return twitterBusiness.find("byChildTwitterId", this.twitterId).<Business>first();
+            }
             */
             else {
                 throw e;
