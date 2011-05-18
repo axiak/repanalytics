@@ -66,7 +66,7 @@ public class NaturalLanguages {
         }
         average /= denominator;
 
-        return average;
+        return average - 3;
     }
 
     public static void trainClassifier() {

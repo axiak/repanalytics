@@ -87,6 +87,7 @@
         </div>
       </div>
     </div>
+    <p class="data-disclaimer">Last updated: {{= $.prettyDate() }}</p>
     {{tmpl "#disambiguate-business"}}
     <span style="clear: both"></span>
     <table class="business-reviews">
@@ -94,7 +95,7 @@
         <th>Date</th>
         <th>Rating</th>
         <th>Review Excerpt</th>
-        <th>Link</th>
+        <th>Source</th>
       </thead>
       <tbody>
 
@@ -106,8 +107,8 @@
 <script id="review-tmpl" type="text/x-jquery-tmpl">
   <tr>
     <td>{{= date}}</td>
-    <td>{{= rating}}</td>
+    <td><img src="/public/img/ratings/stars_mobile_{{= rating}}.gif" alt="{{= rating}} stars"></td>
     <td>{{= text}}</td>
-    <td><a href="{{= sourceUrl}}" title="Source URL">{{= $.titleCase(source)}}</a></td>
+    <td><a href="{{= sourceUrl}}" target="_blank" title="Source URL">{{= $.titleCase(source)}}</a></td>
   </tr>
 </script>

@@ -283,7 +283,7 @@ nav a.disabled {
 }
 
 @mixin placeholderStyle {
-  color: #ccc;
+  color: #aaa;
   font-style: italic;
 }
 
@@ -432,6 +432,7 @@ p.loading {
   padding:  8px;
   @include rounded-corners(3px);
   @include shadow($borderBlue, 2px, 2px, 3px);
+  background:  white;
   cursor: pointer;
 }
 
@@ -459,34 +460,59 @@ p.loading {
 .business-report .business {
   float: right;
   clear: none;
-  margin-right: 20px;
+  position: relative;
+  top: 60px;
+  left: -25px;
+}
+
+
+.ie7 .business-report .business, .ie8 .business-report .business {
+  left: -30px;
 }
 
 .business-report .chart-panel {
   float: left;
-  width: 400px;
+  width: 462px;
   clear: none;
 }
 
 .business-report .chart-tabs {
-  height: 175px;
+  height: 234px;
+}
+
+h2.my-restaurant {
+  position: absolute;
+  top: 190px;
+  left: 500px;
+}
+
+.business-report {
+  /*position: absolute;
+  top: -35px;*/
 }
 
 .business-report table.business-reviews {
   clear: both;
   @include rounded-corners(3px);
   @include shadow($borderBlue, 2px, 2px, 3px);
-  width: 550px;
   position: relative;
-  top: 15px;
+  top: 5px;
+  margin: 0 25px 0 0;
 }
 .business-report th {
   font-weight: bold;
   @include titleFont;
 }
 
+.ie7 table.business-reviews, .ie8 table.business-reviews {
+  margin-right: 30px;
+}
+
 .chart-panel ul {
   font-size: 0.7em;
+}
+.chart-panel ul li a {
+  @include titleFont;
 }
 
 .business-report table, .business-report th, .business-report td {
@@ -495,4 +521,29 @@ p.loading {
   border-collapse: collapse;
 }
 
+.business-report th {
+  padding: 8px;
+}
 
+.business-report td {
+  background: $white;
+}
+.business-report thead {
+  background: #5C9CCC url(./redmond/images/ui-bg_gloss-wave_55_5c9ccc_500x100.png) 50% 50% repeat-x;
+}
+
+#demo-results.my-restaurant {
+  top: 191px;
+}
+
+.business-report .business {
+  cursor: default !important;
+}
+
+.business-report .data-disclaimer {
+  position: absolute;
+  top: 25px;
+  left: 500px;
+  font-style: italic;
+  font-size: 1.1em;
+}

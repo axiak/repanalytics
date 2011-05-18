@@ -88,7 +88,7 @@ Demo.disambiguate = function (inputData, response) {
         }
       });
       Demo.$loading.fadeIn(Demo.fadeTime);
-      Demo.$results.fadeOut(Demo.fadeTime);
+      Demo.$results.hide();
 
     });
 
@@ -101,8 +101,7 @@ Demo.disambiguate = function (inputData, response) {
         if (Modernizr.history) {
           history.back();
         } else {
-          Demo.$formpanel.fadeIn(Demo.fadeTime);
-          Demo.$results.fadeOut(Demo.fadeTime);
+          Demo.returnToFormPanel();
         }
       })
       .button();
@@ -118,16 +117,28 @@ Demo.demoInfo = function (response) {
   $("#business-report").tmpl(response[0].business).appendTo(Demo.$results);
   $("#review-tmpl").tmpl(response).appendTo($("table.business-reviews tbody:first"));
   $(".chart-tabs").tabs();
+  $("h2.subtitle")
+    .addClass("my-restaurant")
+    .html("My Restaurant - Demo");
+  Demo.$results.addClass("my-restaurant");
   Demo.$results.fadeIn(Demo.fadeTime);
 };
 
 
 Demo.popstate = function (e) {
   if (location.pathname === "/demo/") {
-    Demo.$results.hide();
-    Demo.$formpanel.show();
-    Demo.$loading.hide();
+    Demo.returnToFormPanel();
   }
+};
+
+Demo.returnToFormPanel = function () {
+  Demo.$results.hide();
+  Demo.$formpanel.show();
+  Demo.$loading.hide();
+  Demo.$results.removeClass("my-restaurant");
+  $("h2.subtitle")
+    .removeClass("my-restaurant")
+    .html("Demo");
 };
 
 
