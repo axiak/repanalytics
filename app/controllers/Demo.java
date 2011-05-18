@@ -29,27 +29,18 @@ import static com.google.common.collect.Collections2.transform;
 import static com.maxmind.geoip.LookupService.GEOIP_MEMORY_CACHE;
 import static play.libs.Codec.hexMD5;
 import static util.Requests.getIpAddress;
+import static util.Requests.getRequestLocation;
 
 public class Demo extends Controller {
-    private static LookupService geoIp = null;
     private static final String[] STATE_CODES = "AL,AK,AS,AZ,AR,CA,CO,CT,DE,DC,FM,FL,GA,GU,HI,ID,IL,IN,IA,KS,KY,LA,ME,MH,MD,MA,MI,MN,MS,MO,MT,NE,NV,NH,NJ,NM,NY,NC,ND,MP,OH,OK,OR,PW,PA,PR,RI,SC,SD,TN,TX,UT,VT,VI,VA,WA,WV,WI,WY".split(",");
 
-    private static void initializeGeoIp() {
-        String path = new File(new File(Play.applicationPath, "dat"), "GeoIPCity.dat").getAbsolutePath();
-        try {
-            geoIp = new LookupService(path, GEOIP_MEMORY_CACHE);
-        } catch (IOException e) {
-            Logger.info(e, "Could not open geoip service.");
-        }
+    @Before
+    public static void initializeJmx() {
+        new JmxInitialization().now();
     }
 
-
     public static void index() {
-        new JmxInitialization().now();
-        if (geoIp == null) {
-            initializeGeoIp();
-        }
-        Location l = geoIp.getLocation(getIpAddress(request));
+        Location l = getRequestLocation(request);
         renderArgs.put("states", STATE_CODES);
         renderArgs.put("currentState", l.region);
         render();
@@ -83,21 +74,13 @@ public class Demo extends Controller {
                 .address(request.params.get("address"))
                 .state(request.params.get("state"))
                 .phone(request.params.get("phone"))
-                .now()), new Predicate<F.Tuple<Double, Business>>() {
-            @Override
-            public boolean apply(@Nullable F.Tuple<Double, Business> doubleBusinessTuple) {
-                return doubleBusinessTuple != null && doubleBusinessTuple._1 > 0.7;
-            }
-        }));
+                .now()), new IsBusinessWellMatched()));
 
         int i=0;
         for (F.Tuple<Double, Business> business : businesses) {
-            try {
-                business._2.save();
-            } catch (PersistenceException e) {
-                businesses.set(i, new F.Tuple<Double, Business>(business._1,
-                        YelpBusiness.find("byYelpId", business._2.yelpId).<Business>first()));
-            }
+            Business currentBusiness = business._2.addToDatabase();
+            businesses.set(i, new F.Tuple<Double, Business>(business._1, currentBusiness));
+            Cache.set("business_" + currentBusiness.id, currentBusiness);
             i++;
         }
 
@@ -116,10 +99,22 @@ public class Demo extends Controller {
     }
 
     public static void demoInformation(String id) {
-        demoInformation(Business.find("byId", Long.valueOf(id)).<Business>first());
+        Business business = Cache.get("business_" + id, Business.class);
+        if (business == null) {
+            business = Business.find("byId", Long.valueOf(id)).<Business>first();
+        }
+        demoInformation(business);
     }
 
     private static void demoInformation(Business business) {
         renderJSON("BOO");
+    }
+
+
+    private static class IsBusinessWellMatched implements Predicate<F.Tuple<Double, Business>> {
+        @Override
+        public boolean apply(@Nullable F.Tuple<Double, Business> doubleBusinessTuple) {
+            return doubleBusinessTuple != null && doubleBusinessTuple._1 > 0.7;
+        }
     }
 }

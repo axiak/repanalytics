@@ -4,6 +4,7 @@ import play.db.jpa.Model;
 
 import javax.persistence.Entity;
 import javax.persistence.Inheritance;
+import javax.persistence.PersistenceException;
 
 import static javax.persistence.InheritanceType.JOINED;
 
@@ -36,5 +37,38 @@ public class Business extends Model {
                 ", zip='" + zip + '\'' +
                 ", phone='" + phone + '\'' +
                 '}';
+    }
+
+    /*
+     * This calls save if the id is null. If there is a duplicate pk due to the source,
+     * it will try and find the actual replacement.
+     */
+    public Business addToDatabase() {
+        if (this.id != null) {
+            return this;
+        }
+        try {
+            this.save();
+            return this;
+        } catch (PersistenceException e) {
+            if (this.yelpId != null) {
+                return YelpBusiness.find("byChildYelpId", this.yelpId).<Business>first();
+            }
+            /* TODO - As we add more sources, we should uncomment this logic. */
+            /*
+            else if (this.facebookId != null) {
+                return FacebookBusiness.find("byChildFacebookId", this.facebookId).<Business>first();
+            }
+            else if (this.urbanspoonId != null) {
+                return UrbanspoonBusiness.find("byChildUrbanspoonId", this.urbanspoonId).<Business>first();
+            }
+            else if (this.tripAdvisorId != null) {
+                return TripAdvisorBusiness.find("byChildTripAdvisorId", this.tripAdvisorId).<Business>first();
+            }
+            */
+            else {
+                throw e;
+            }
+        }
     }
 }
