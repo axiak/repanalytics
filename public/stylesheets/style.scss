@@ -20,20 +20,34 @@ $borderBlue: #C5DBEC;
 $errorColor: #c00;
 $highlight: #F5E6D6;
 
-h1, h2, h3, h4 {
+@mixin titleFont {
   font-family: "UbuntuBold", "Verdana", "Lucida Grande", "Gill Sans", "Arial", "Helvetica", sans-serif;
+}
+
+@mixin monoFont {
+  font-family: "Liberation Mono", Menlo, Courier New, Courier, Mono, monospace;
+}
+
+@mixin normalFont {
+  font-family: /*"Andron Freefont LAT",*/ "Hoefler Text", "Baskerville", "Palatino", "Georgia", "Times New Roman", serif;
+}
+
+h1, h2, h3, h4 {
+  @include titleFont;
 }
 
 h5, h6, p, span, a, footer, header, address, cite, code, del, ins {
-  font-family: /*"Andron Freefont LAT",*/ "Hoefler Text", "Baskerville", "Palatino", "Georgia", "Times New Roman", serif; font-size: 1.167em;
+  @include normalFont;
+  font-size: 1.167em;
 }
 
 tt, pre, code {
-  font-family: "Liberation Mono", Menlo, Courier New, Courier, Mono, monospace; font-size: 0.926em;
+  @include monoFont;
+  font-size: 0.926em;
 }
 
 nav a {
-  font-family: "UbuntuBold", "Verdana", "Lucida Grande", "Gill Sans", "Arial", "Helvetica", sans-serif;
+  @include titleFont;
 }
 
 @mixin pie {
@@ -441,3 +455,44 @@ p.loading {
 #disambiguate-back {
   margin:  30px;
 }
+
+.business-report .business {
+  float: right;
+  clear: none;
+  margin-right: 20px;
+}
+
+.business-report .chart-panel {
+  float: left;
+  width: 400px;
+  clear: none;
+}
+
+.business-report .chart-tabs {
+  height: 175px;
+}
+
+.business-report table.business-reviews {
+  clear: both;
+  @include rounded-corners(3px);
+  @include shadow($borderBlue, 2px, 2px, 3px);
+  width: 550px;
+  position: relative;
+  top: 15px;
+}
+.business-report th {
+  font-weight: bold;
+  @include titleFont;
+}
+
+.chart-panel ul {
+  font-size: 0.7em;
+}
+
+.business-report table, .business-report th, .business-report td {
+  border:  1px solid $borderBlue;
+  padding:  4px;
+  border-collapse: collapse;
+}
+
+

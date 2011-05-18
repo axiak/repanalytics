@@ -173,6 +173,8 @@ public class YelpV2API implements YelpAPI, RemoteBusinessFinder, PhoneBusinessSe
         JsonArray jsonReviews = element.getAsJsonObject().get("reviews").getAsJsonArray();
         List<Review> reviews = new ArrayList<Review>();
 
+        Logger.info("Json data: %s", response);
+
         for (JsonElement reviewElement : jsonReviews) {
             JsonObject reviewObject = reviewElement.getAsJsonObject();
             Review review = new Review();

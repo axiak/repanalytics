@@ -88,7 +88,7 @@ Demo.disambiguate = function (inputData, response) {
         }
       });
       Demo.$loading.fadeIn(Demo.fadeTime);
-      Demo.$results.fadeOut(Demo.fadeTime, function () {Demo.$results.html('');});
+      Demo.$results.fadeOut(Demo.fadeTime);
 
     });
 
@@ -115,7 +115,9 @@ Demo.disambiguate = function (inputData, response) {
  */
 Demo.demoInfo = function (response) {
   Demo.$results.html('');
-  $("#review-tmpl").tmpl(response).appendTo(Demo.$results);
+  $("#business-report").tmpl(response[0].business).appendTo(Demo.$results);
+  $("#review-tmpl").tmpl(response).appendTo($("table.business-reviews tbody:first"));
+  $(".chart-tabs").tabs();
   Demo.$results.fadeIn(Demo.fadeTime);
 };
 

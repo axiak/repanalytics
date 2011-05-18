@@ -3,6 +3,7 @@ package controllers;
 import bootstrap.JmxInitialization;
 import com.google.common.base.Predicate;
 import com.google.common.collect.Collections2;
+import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
 import com.maxmind.geoip.Location;
 import com.maxmind.geoip.LookupService;
@@ -111,7 +112,8 @@ public class Demo extends Controller {
     private static void demoInformation(Business business) {
         ReviewFinderService service = new ReviewFinderService(new YelpV2API(), business);
         List<Review> reviews = await(service.now()).get(business);
-        renderJSON(reviews);
+        Collections.sort(reviews);
+        renderJSON(new GsonBuilder().setDateFormat("MM/dd/yyyy").create().toJson(reviews));
     }
 
 

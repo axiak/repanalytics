@@ -71,12 +71,43 @@
   <img width="96" height=96 border=0 class='business-map' src="http://maps.google.com/maps/api/staticmap?center={{= latitude}},{{= longitude}}&zoom=13&size=96x96&maptype=roadmap&markers=color:blue%7Clabel:{{= encodeURIComponent(name) }}%7C{{= latitude}},{{= longitude}}&sensor=false">
 </script>
 
-<script id="review-tmpl" type="text/x-jquery-tmpl">
-  <div class="review">
-    <h4>Rating: {{= rating }}</h4>
-    <h4>Sentiment: {{= sentiment }}</h4>
-    <span class="review-text">
-      {{= text }}
-    </span>
+<script id="business-report" type="text/x-jquery-tmpl">
+  <div class="business-report">
+    <div class="chart-panel">
+      <div class="chart-tabs">
+        <ul>
+          <li><a href="#tab-sentiment">Sentiments</a></li>
+          <li><a href="#tab-ratings">Ratings</a></li>
+        </ul>
+        <div id="tab-sentiment">
+          -- SENTIMENT GRAPH HERE --
+        </div>
+        <div id="tab-ratings">
+          -- RATING GRAPH HERE --
+        </div>
+      </div>
+    </div>
+    {{tmpl "#disambiguate-business"}}
+    <span style="clear: both"></span>
+    <table class="business-reviews">
+      <thead>
+        <th>Date</th>
+        <th>Rating</th>
+        <th>Review Excerpt</th>
+        <th>Link</th>
+      </thead>
+      <tbody>
+
+      </tbody>
+    </table>
   </div>
+</script>
+
+<script id="review-tmpl" type="text/x-jquery-tmpl">
+  <tr>
+    <td>{{= date}}</td>
+    <td>{{= rating}}</td>
+    <td>{{= text}}</td>
+    <td><a href="{{= sourceUrl}}" title="Source URL">{{= $.titleCase(source)}}</a></td>
+  </tr>
 </script>
