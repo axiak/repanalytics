@@ -467,7 +467,7 @@ p.loading {
 
 
 .ie7 .business-report .business, .ie8 .business-report .business {
-  left: -30px;
+  left: -40px;
 }
 
 .business-report .chart-panel {
@@ -486,11 +486,6 @@ h2.my-restaurant {
   left: 500px;
 }
 
-.business-report {
-  /*position: absolute;
-  top: -35px;*/
-}
-
 .business-report table.business-reviews {
   clear: both;
   @include rounded-corners(3px);
@@ -505,7 +500,7 @@ h2.my-restaurant {
 }
 
 .ie7 table.business-reviews, .ie8 table.business-reviews {
-  margin-right: 30px;
+  margin-right: 35px;
 }
 
 .chart-panel ul {

@@ -173,7 +173,7 @@ public class YelpV2API implements YelpAPI, RemoteBusinessFinder, PhoneBusinessSe
         JsonArray jsonReviews = element.getAsJsonObject().get("reviews").getAsJsonArray();
         List<Review> reviews = new ArrayList<Review>();
 
-        Logger.info("Json data: %s", response);
+        String sourceUrl = element.getAsJsonObject().get("url").getAsString();
 
         for (JsonElement reviewElement : jsonReviews) {
             JsonObject reviewObject = reviewElement.getAsJsonObject();
@@ -185,6 +185,7 @@ public class YelpV2API implements YelpAPI, RemoteBusinessFinder, PhoneBusinessSe
                 review.text = reviewObject.get("excerpt").getAsString();
                 review.userName = reviewObject.get("user").getAsJsonObject().get("name").getAsString();
                 review.source = ReviewSource.YELP;
+                review.sourceUrl = sourceUrl;
             } catch (NullPointerException e) {
                 Logger.info(e, "");
                 Logger.info("Failed to parse json response from yelp for business %s: %s", business.id, response);
