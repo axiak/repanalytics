@@ -3,13 +3,12 @@ package controllers;
 import bootstrap.JmxInitialization;
 import com.google.common.base.Predicate;
 import com.google.common.collect.Collections2;
-import com.google.common.collect.ImmutableMap;
-import com.google.gson.JsonElement;
 import com.google.gson.reflect.TypeToken;
 import com.maxmind.geoip.Location;
 import com.maxmind.geoip.LookupService;
 import models.businesses.Business;
 import models.businesses.BusinessChain;
+import models.businesses.YelpBusiness;
 import play.Logger;
 import play.Play;
 import play.cache.Cache;
@@ -24,6 +23,7 @@ import service.search.RemoteBusinessSearchBuilder;
 import service.yelp.YelpV2API;
 
 import javax.annotation.Nullable;
+import javax.persistence.PersistenceException;
 
 import static com.google.common.collect.Collections2.transform;
 import static com.maxmind.geoip.LookupService.GEOIP_MEMORY_CACHE;
@@ -90,6 +90,17 @@ public class Demo extends Controller {
             }
         }));
 
+        int i=0;
+        for (F.Tuple<Double, Business> business : businesses) {
+            try {
+                business._2.save();
+            } catch (PersistenceException e) {
+                businesses.set(i, new F.Tuple<Double, Business>(business._1,
+                        YelpBusiness.find("byYelpId", business._2.yelpId).<Business>first()));
+            }
+            i++;
+        }
+
         if (businesses.size() == 0) {
             renderJSON(new F.Tuple<String, String>("notfound", ""), new TypeToken<F.Tuple<String, String>>(){}.getType());
             return;
@@ -102,6 +113,10 @@ public class Demo extends Controller {
 
         renderJSON(new F.Tuple<String, List<F.Tuple<Double, Business>>>("disambiguate", businesses),
                    new TypeToken<F.Tuple<String, List<F.Tuple<Double, Business>>>>() {}.getType());
+    }
+
+    public static void demoInformation(String id) {
+        demoInformation(Business.find("byId", Long.valueOf(id)).<Business>first());
     }
 
     private static void demoInformation(Business business) {

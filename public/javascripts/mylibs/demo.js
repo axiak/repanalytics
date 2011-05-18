@@ -6,6 +6,7 @@ Demo.$formpanel = null;
 Demo.$formerrors = null;
 Demo.fadeTime = 250;
 Demo.searchHref = "/demo/search/";
+Demo.selectHref = "/demo/info/";
 Demo.$results = null;
 
 Demo.initialize = function () {
@@ -28,7 +29,7 @@ Demo.runDemo = function (data) {
           } else if (response._1 && response._1 === "disambiguate") {
             return Demo.disambiguate(data, response);
           } else {
-            return Demo.demoInfo(data, response);
+            return Demo.demoInfo(response);
           }
         }
       });
@@ -60,26 +61,61 @@ Demo.notfound = function (inputData) {
  * select against.
  */
 Demo.disambiguate = function (inputData, response) {
-  if (response._2.length > 1) {
+  var resultLength = response._2.length;
+  if (resultLength > 1) {
     Demo.$results.html("<p>The following businesses match your search. Please continue by selecting your business.</p>");
   } else {
     Demo.$results.html("<p>The following business matches your search, but wasn't an exact match. Please confirm that this is your business.</p>");
   }
 
   $("#disambiguate-business").tmpl($.map(response._2, function (_) {return _._2;})).appendTo(Demo.$results);
+
+  $(".business", Demo.$results)
+    .mouseenter(function (e) {
+      $(this).addClass("highlighted");
+    })
+    .mouseleave(function (e) {
+      $(this).removeClass("highlighted");
+    })
+    .click(function (e) {
+      $.ajax({
+        url: Demo.selectHref,
+        type: "GET",
+        data: {"id": $(this).attr("data-id")},
+        success: function (response) {
+          Demo.$loading.fadeOut(Demo.fadeTime);
+          Demo.demoInfo(response);
+        }
+      });
+    });
+
+  var backLinks = ["This is not my business.", "Neither of these businesses are mine.", "None of these businesses are mine."];
+
+  $("<button id='disambiguate-back'>" + backLinks[Math.min(resultLength - 1, 2)]  + "</a>")
+      .appendTo(Demo.$results)
+      .click(function (e) {
+        e.preventDefault();
+        if (Modernizr.history) {
+          history.back();
+        } else {
+          Demo.$formpanel.fadeIn(Demo.fadeTime);
+          Demo.$results.fadeOut(Demo.fadeTime);
+        }
+      })
+      .button();
+
   Demo.$results.fadeIn(Demo.fadeTime);
 };
 
 /*
  * We have data for a business. We have to show it now.
  */
-Demo.demoInfo = function (inputData, response) {
+Demo.demoInfo = function (response) {
 
 };
 
 
 Demo.popstate = function (e) {
-  console.log(location.href.path);
   if (location.pathname === "/demo/") {
     Demo.$results.hide();
     Demo.$formpanel.show();
