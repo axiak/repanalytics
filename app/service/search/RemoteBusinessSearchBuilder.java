@@ -98,7 +98,6 @@ public final class RemoteBusinessSearchBuilder extends Job<List<F.Tuple<Double, 
         String addressLine = Joiner.on(", ").skipNulls().join(Arrays.asList(normalizeNoPunctuation(get("address")),
                                                                             normalizeNoPunctuation(get("city")),
                                                                             normalizeNoPunctuation(get("state"))));
-        Logger.info(addressLine);
         String cacheKey = "geocode_" + hexMD5(addressLine);
         @SuppressWarnings("unchecked")
         List<Double> result = Cache.get(cacheKey, List.class);

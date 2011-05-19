@@ -27,7 +27,7 @@ public class ReviewFinderService extends Job<Map<Business, List<Review>>> {
         for (Business business : businesses) {
             List<Review> reviews = fetcher.getReviews(business);
             for (Review review : reviews) {
-                review.sentiment = reviewSentiment(review.text);
+                reviewSentiment(review);
             }
             result.put(business, reviews);
         }

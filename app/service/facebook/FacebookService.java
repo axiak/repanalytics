@@ -46,12 +46,12 @@ public class FacebookService implements RemoteBusinessFinder, ReviewFetcher, Pho
                                                           Parameter.with("type", "page"));
         result = handlePageResponse(response);
         Cache.set(cacheKey, result, "1440mn");
-        Logger.info("Facebook result: %s", result);
         return result;
     }
 
     @Override
     public List<Business> findBusinessesByName(String name, double lat, double lng, int distance) {
+        name = name.split(" - ")[0];
         String cacheKey = "facebook_page_" + hexMD5(name + "," + lat + "," + lng + "," + distance);
         @SuppressWarnings("unchecked")
         List<Business> result = Cache.get(cacheKey, List.class);
@@ -66,7 +66,6 @@ public class FacebookService implements RemoteBusinessFinder, ReviewFetcher, Pho
                                                           Parameter.with("location", "" + lat + "," + lng));
         result = handlePageResponse(response);
         Cache.set(cacheKey, result, "1440mn");
-        Logger.info("Facebook result: %s", result);
         return result;
     }
 
@@ -76,15 +75,19 @@ public class FacebookService implements RemoteBusinessFinder, ReviewFetcher, Pho
 
     @Override
     public List<Review> getReviews(@Nonnull Business business) {
+        if (business.name == null) {
+            return new ArrayList<Review>();
+        }
         String cacheKey = "facebook_review_" + business.id;
         @SuppressWarnings("unchecked")
         List<Review> reviews = Cache.get(cacheKey, List.class);
         if (reviews != null) {
             return reviews;
         }
+        String name = business.name.split(" - ")[0];
         FacebookClient facebookClient = new DefaultFacebookClient();
         Connection<Post> publicSearch = facebookClient.fetchConnection("search", Post.class,
-                                            Parameter.with("q", business.name), Parameter.with("type", "post"));
+                                            Parameter.with("q", name), Parameter.with("type", "post"));
         reviews = new ArrayList<Review>();
         for (Post post : publicSearch.getData()) {
             if (post == null || post.getMessage() == null) {

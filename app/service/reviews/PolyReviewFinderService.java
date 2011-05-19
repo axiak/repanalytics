@@ -45,7 +45,7 @@ public final class PolyReviewFinderService extends Job<Map<Business, List<Review
                 }
             }
         }
-        // TODO - If this (O(n ln n)) is too slow, we can merge the sorted arrays in O(n)
+        // TODO - If this (O(n ln n)) is too slow, we can merge the sorted arrays in O(n) above
         for (List<Review> reviewList : aggregate.values()) {
             Collections.sort(reviewList);
         }

@@ -132,9 +132,12 @@ Demo.demoInfo = function (response) {
       }
   );
   if (Demo.$results.height() > 450) {
+    Demo.originalDocHeight = $("#doc2").height();
     $("#doc2").height(Demo.$results.height() + 241);
   }
 };
+
+
 
 Demo.drawSentimentGraph = function (results) {
   var data = new google.visualization.DataTable();
@@ -167,8 +170,10 @@ Demo.drawSentimentGraph = function (results) {
         legend: "none", vAxis: {
           title: "Review Sentiment"
         },
-        chartArea: { width: 340 }});
+        chartArea: { width: 360 }});
 };
+
+
 
 Demo.drawRatingPie = function (results) {
   var data = new google.visualization.DataTable();
@@ -196,10 +201,12 @@ Demo.drawRatingPie = function (results) {
     idx++;
   });
   var chart = new google.visualization.PieChart($("#tab-ratings")[0]);
-  chart.draw(data, {width: 450, height: 220, title: "Rating Breakdown", legend: "none", is3D: true, chartArea: {
-        top: 5, left: 5, width: 440, height: 210
+  chart.draw(data, {width: 450, height: 220, title: "Rating Breakdown", is3D: true, chartArea: {
+        top: 8, left: 45, height: 220, width: 800
       }});
 };
+
+
 
 Demo.secretSquirrel = function () {
   if (!Demo.$formpanel.is(":visible")) {
@@ -222,11 +229,15 @@ Demo.secretSquirrel = function () {
 }
 
 
+
+
 Demo.popstate = function (e) {
   if (location.pathname === "/demo/") {
     Demo.returnToFormPanel();
   }
 };
+
+
 
 Demo.returnToFormPanel = function () {
   Demo.$results.hide();
@@ -236,6 +247,10 @@ Demo.returnToFormPanel = function () {
   $("h2.subtitle")
     .removeClass("my-restaurant")
     .html("Demo");
+
+  if (Demo.originalDocHeight) {
+    $("#doc2").height(Demo.originalDocHeight);
+  }
 };
 
 Demo.formatSentiment = function (sentiment) {

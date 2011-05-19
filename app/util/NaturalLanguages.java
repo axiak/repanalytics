@@ -4,6 +4,7 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.InstanceCreator;
 import com.google.gson.reflect.TypeToken;
+import models.businesses.Review;
 import opennlp.tools.doccat.DoccatModel;
 import opennlp.tools.doccat.DocumentCategorizer;
 import opennlp.tools.doccat.DocumentCategorizerME;
@@ -16,6 +17,7 @@ import play.Logger;
 import play.Play;
 import play.libs.F;
 
+import javax.annotation.Nonnull;
 import java.io.*;
 import java.lang.reflect.Type;
 import java.util.*;
@@ -52,25 +54,27 @@ public class NaturalLanguages {
         return tokenizer.tokenize(input);
     }
 
-    public static double reviewSentiment(String text) {
+    public static void reviewSentiment(@Nonnull Review review) {
+        if (review.text == null) {
+            return;
+        }
         initializeCategorizationModel();
         DocumentCategorizer categorizer = new DocumentCategorizerME(categorizationModel);
+        double[] categorization = categorizer.categorize(tokenizeString(review.text));
+        int sentimentRating = Integer.valueOf(categorizer.getBestCategory(categorization));
+        if (review.rating == null) {
+            review.rating = sentimentRating;
+        }
 
         int i = 0;
         double average = 0, denominator = 0;
-        double[] categorization = categorizer.categorize(tokenizeString(text));
-        for (double dimensionValue : categorization) {
-            double weight = Math.pow(dimensionValue, 5);
-            average += weight * Integer.valueOf(categorizer.getCategory(i));
+        for (double dimensionalValue : categorization) {
+            double weight = Math.pow(dimensionalValue, 10);
+            average += weight * Integer.valueOf(categorizer.getCategory(i++));
             denominator += weight;
-            i++;
         }
-
-        average /= denominator;
-
-        Logger.info("Classification of %s: %s [%s]", Arrays.toString(categorization), average - 3, text);
-
-        return average - 3;
+        average /= (denominator * 2.5);
+        review.sentiment = average - 1;
     }
 
     public static void trainClassifier() {
