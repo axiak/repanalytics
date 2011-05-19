@@ -66,7 +66,7 @@ $(function () {
     e.preventDefault();
     $.ajax({
           url: "/notification/email/",
-          data: {"email": $("#get-notified").val()},
+          data: {"email": $("#get-notified").val(), "locations": $("#num-locations").val()},
           type: "POST",
           success: function (data) {
             self.disabled = "";

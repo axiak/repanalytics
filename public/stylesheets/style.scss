@@ -384,12 +384,16 @@ h2.subtitle {
   text-align: center;
 }
 
-#get-notified {
+#num-locations, #get-notified {
   border: 1px solid #C5DBEC;
   padding: 5px;
   font-size: 16px;
   margin:  5px 0;
   width: 300px;
+}
+
+#num-locations {
+  width: 160px;
 }
 
 input:disabled {

@@ -15,6 +15,7 @@ public class SeedUser extends Model {
     @Temporal(TemporalType.TIMESTAMP) public Date insertDate;
     public String ipAddress;
     public String userAgent;
+    public Integer numberLocations;
 
     @Override
     public <T extends JPABase> T save() {
