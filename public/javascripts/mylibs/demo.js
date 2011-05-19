@@ -1,4 +1,4 @@
-var Demo = Demo || {};
+window.Demo = window.Demo || {};
 
 Demo.$loading = null;
 Demo.$subcontainer = null;
@@ -19,6 +19,10 @@ Demo.initialize = function () {
   $("#login-button").click(function () {
     Demo.secretSquirrel();
   });
+  if (Demo.showBusinessId) {
+    Demo.showBusinessInfo(Demo.showBusinessId);
+    Demo.$loading.show();
+  }
 };
 
 Demo.runDemo = function (data) {
@@ -82,17 +86,7 @@ Demo.disambiguate = function (inputData, response) {
       $(this).removeClass("highlighted");
     })
     .click(function (e) {
-      $.ajax({
-        url: Demo.selectHref,
-        type: "GET",
-        data: {"id": $(this).attr("data-id")},
-        success: function (response) {
-          Demo.$loading.fadeOut(Demo.fadeTime);
-          Demo.demoInfo(response);
-        }
-      });
-      Demo.$loading.fadeIn(Demo.fadeTime);
-      Demo.$results.hide();
+      Demo.showBusinessInfo($(this).attr("data-id"));
 
     });
 
@@ -113,6 +107,20 @@ Demo.disambiguate = function (inputData, response) {
   Demo.$results.fadeIn(Demo.fadeTime);
 };
 
+Demo.showBusinessInfo = function (id) {
+  $.ajax({
+        url: Demo.selectHref,
+        type: "GET",
+        data: {"id": id},
+        success: function (response) {
+          Demo.$loading.fadeOut(Demo.fadeTime);
+          Demo.demoInfo(response);
+        }
+      });
+      Demo.$loading.fadeIn(Demo.fadeTime);
+      Demo.$formpanel.hide();
+      Demo.$results.hide();
+};
 /*
  * We have data for a business. We have to show it now.
  */
@@ -134,6 +142,10 @@ Demo.demoInfo = function (response) {
   if (Demo.$results.height() > 450) {
     Demo.originalDocHeight = $("#doc2").height();
     $("#doc2").height(Demo.$results.height() + 241);
+  }
+  if (Modernizr.history) {
+    history.pushState(null, null, "/demo/info/" + response[0].business.id + "/");
+    $(window).bind("popstate", Demo.popstate);
   }
 };
 
@@ -168,7 +180,12 @@ Demo.drawSentimentGraph = function (results) {
   var chart = new google.visualization.LineChart($("#tab-sentiment")[0]);
   chart.draw(data, {width: 450, height: 220,
         legend: "none", vAxis: {
-          title: "Review Sentiment"
+          title: "Review Sentiment",
+          titleTextStyle: {
+            color: '#332',
+            fontName: "Georgia",
+            textSize: '16px'
+          }
         },
         chartArea: { width: 360 }});
 };

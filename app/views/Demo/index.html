@@ -120,3 +120,10 @@
     <td><a href="{{= sourceUrl}}" target="_blank" title="Source URL"><img src="/public/img/logos/{{= source.toLowerCase()}}.gif"></a></td>
   </tr>
 </script>
+
+#{if id }
+<script type='text/javascript'>
+  window.Demo = window.Demo || {};
+  Demo.showBusinessId = '${id}';
+</script>
+#{/if}

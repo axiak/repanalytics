@@ -110,6 +110,9 @@ public class Demo extends Controller {
     }
 
     public static void demoInformation(String id) {
+        if (!request.isAjax()) {
+            renderTemplate("Demo/index.html", id);
+        }
         Business business = Cache.get("business_" + id, Business.class);
         if (business == null) {
             business = Business.find("byId", Long.valueOf(id)).<Business>first();

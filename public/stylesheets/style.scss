@@ -40,6 +40,9 @@ h5, h6, p, span, a, footer, header, address, cite, code, del, ins {
   @include normalFont;
   font-size: 1.167em;
 }
+td, tr, tbody, table {
+  @include normalFont;
+}
 
 tt, pre, code {
   @include monoFont;
@@ -434,6 +437,11 @@ p.loading {
   @include shadow($borderBlue, 2px, 2px, 3px);
   background:  white;
   cursor: pointer;
+}
+
+.ie6 #demo-results .business {
+  margin-left: 20px;
+  padding:  0;
 }
 
 #demo-results .highlighted {
