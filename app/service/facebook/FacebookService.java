@@ -76,10 +76,16 @@ public class FacebookService implements RemoteBusinessFinder, ReviewFetcher, Pho
 
     @Override
     public List<Review> getReviews(@Nonnull Business business) {
+        String cacheKey = "facebook_review_" + business.id;
+        @SuppressWarnings("unchecked")
+        List<Review> reviews = Cache.get(cacheKey, List.class);
+        if (reviews != null) {
+            return reviews;
+        }
         FacebookClient facebookClient = new DefaultFacebookClient();
         Connection<Post> publicSearch = facebookClient.fetchConnection("search", Post.class,
                                             Parameter.with("q", business.name), Parameter.with("type", "post"));
-        List<Review> reviews = new ArrayList<Review>();
+        reviews = new ArrayList<Review>();
         for (Post post : publicSearch.getData()) {
             if (post == null || post.getMessage() == null) {
                 continue;
@@ -96,6 +102,7 @@ public class FacebookService implements RemoteBusinessFinder, ReviewFetcher, Pho
                 break;
             }
         }
+        Cache.set(cacheKey, reviews, "1440mn");
         return reviews;
     }
 }

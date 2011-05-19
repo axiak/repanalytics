@@ -131,6 +131,9 @@ Demo.demoInfo = function (response) {
         Demo.drawRatingPie(response);
       }
   );
+  if (Demo.$results.height() > 450) {
+    $("#doc2").height(Demo.$results.height() + 241);
+  }
 };
 
 Demo.drawSentimentGraph = function (results) {
@@ -142,8 +145,8 @@ Demo.drawSentimentGraph = function (results) {
   var datesList = [];
   $.each(results, function (index, value) {
     if (value.date in dateData) {
-      dateData[value.date][1] += value.sentiment;
-      dateData[value.date][2] ++;
+      dateData[value.date][0] += value.sentiment;
+      dateData[value.date][1] ++;
     } else {
       var dateParts = value.date.split("/");
       dateData[value.date] = [value.sentiment, 1];
@@ -160,7 +163,11 @@ Demo.drawSentimentGraph = function (results) {
     data.setValue(j, 1, Demo.formatSentiment(avgSentiment));
   }
   var chart = new google.visualization.LineChart($("#tab-sentiment")[0]);
-  chart.draw(data, {width: 450, height: 220, title: "Review Sentiment"});
+  chart.draw(data, {width: 450, height: 220,
+        legend: "none", vAxis: {
+          title: "Review Sentiment"
+        },
+        chartArea: { width: 340 }});
 };
 
 Demo.drawRatingPie = function (results) {
@@ -189,7 +196,9 @@ Demo.drawRatingPie = function (results) {
     idx++;
   });
   var chart = new google.visualization.PieChart($("#tab-ratings")[0]);
-  chart.draw(data, {width: 450, height: 220, title: "Rating Breakdown"});
+  chart.draw(data, {width: 450, height: 220, title: "Rating Breakdown", legend: "none", is3D: true, chartArea: {
+        top: 5, left: 5, width: 440, height: 210
+      }});
 };
 
 Demo.secretSquirrel = function () {
