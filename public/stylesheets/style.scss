@@ -44,6 +44,10 @@ td, tr, tbody, table {
   @include normalFont;
 }
 
+strong {
+  font-weight: bold;
+}
+
 tt, pre, code {
   @include monoFont;
   font-size: 0.926em;
@@ -358,14 +362,20 @@ h2.subtitle {
 
 #left-panel {
   float: left;
-  width: 590px;
+  width: 530px;
   border-right:  1px solid $borderBlue;
 }
 
 #slideshow-wrapper {
-  width: 314px;
+  width: 360px;
   float: right;
-  overflow: hidden
+  margin-top: 30px;
+  text-align: center;
+}
+
+#slideshow {
+  width: 100%;
+  text-align: center;
 }
 
 #get-notified {
@@ -553,4 +563,8 @@ h2.my-restaurant {
 
 #tab-sentiment, #tab-ratings {
   padding: 0;
+}
+
+#slideshow {
+  vertical-align: middle;
 }

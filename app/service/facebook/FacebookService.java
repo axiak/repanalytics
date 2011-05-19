@@ -19,9 +19,7 @@ import service.search.RemoteBusinessFinder;
 
 import javax.annotation.Nonnull;
 import java.io.Console;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import java.util.*;
 
 import static play.libs.Codec.hexMD5;
 import static util.Strings.normalizePhone;
@@ -89,8 +87,9 @@ public class FacebookService implements RemoteBusinessFinder, ReviewFetcher, Pho
         Connection<Post> publicSearch = facebookClient.fetchConnection("search", Post.class,
                                             Parameter.with("q", name), Parameter.with("type", "post"));
         reviews = new ArrayList<Review>();
+        Set<String> reviewTexts = new HashSet<String>();
         for (Post post : publicSearch.getData()) {
-            if (post == null || post.getMessage() == null) {
+            if (post == null || post.getMessage() == null || reviewTexts.contains(post.getMessage())) {
                 continue;
             }
             Review review = new Review();
@@ -101,10 +100,10 @@ public class FacebookService implements RemoteBusinessFinder, ReviewFetcher, Pho
             review.business = business;
             review.sourceUrl = post.getLink();
             reviews.add(review);
-            if (reviews.size() > 5) {
-                break;
-            }
+            reviewTexts.add(post.getMessage());
         }
+        Collections.shuffle(reviews);
+        reviews = new ArrayList<Review>(reviews.subList(0, Math.min(10, reviews.size())));
         Cache.set(cacheKey, reviews, "1440mn");
         return reviews;
     }

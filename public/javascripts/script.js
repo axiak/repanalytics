@@ -81,7 +81,8 @@ $(function () {
   });
 
   $("#slideshow").cycle({
-        speed: 500
+        pause: 2.5,
+        speed: 2500
       });
 });
 
