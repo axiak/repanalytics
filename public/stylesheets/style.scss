@@ -9,7 +9,7 @@ $blue: #77aadd;
 
 /* Vibrant */
 $black: #333322;
-$brown: #887766;
+$brown: #274d7e;
 $white: #ffffff;
 $gray: #dddddd;
 $blue: #77aadd;
@@ -154,6 +154,7 @@ h1, h2, h3, h4, h5, h6 {
   font-weight: bold;
 }
 
+
 h1 {
   font-size: 2.6em;
 }
@@ -210,7 +211,7 @@ header {
 #title {
   width: 100%;
   text-align: center;
-  color: $brown;
+  color: black; /*#05326d;*/
 }
 
 nav {
@@ -284,6 +285,11 @@ nav ul li a:active {
 nav a.disabled {
   color: #bbb;
 }
+
+h2, h3, h4, h5, h6, nav a, th {
+  color: $brown !important;
+}
+
 
 #login-button {
   @include opacity(30);

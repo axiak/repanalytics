@@ -27,6 +27,7 @@ import service.reviews.ReviewFetcher;
 import service.reviews.ReviewFinderService;
 import service.search.PolyRemoteBusinessSearchBuilder;
 import service.search.RemoteBusinessSearchBuilder;
+import service.twitter.TwitterService;
 import service.yelp.YelpV2API;
 
 import javax.annotation.Nullable;
@@ -122,7 +123,7 @@ public class Demo extends Controller {
 
     private static void demoInformation(Business business) {
         List<ReviewFetcher> finders = new ArrayList<ReviewFetcher>();
-        finders.add(new YelpV2API()); finders.add(new FacebookService());
+        finders.add(new YelpV2API()); finders.add(new FacebookService()); finders.add(new TwitterService());
         PolyReviewFinderService service = new PolyReviewFinderService(finders,
                                                                       business);
         List<Review> reviews = await(service.now()).get(business);

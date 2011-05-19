@@ -13,3 +13,17 @@ require:
     - org.apache.poi -> poi 3.7
     - com.restfb -> restfb 1.6.4
     - org.apache.opennlp -> opennlp-tools 1.5.1-incubating
+    - org.twitter4j -> twitter4j-core [2.1,)
+
+
+repositories:
+    - twitter4j.org:
+         type:       iBiblio
+         root:   "http://twitter4j.org/maven2"
+         contains:
+                - org.twitter4j -> *
+    - opennlp:
+         type:       iBiblio
+         root:    "http://opennlp.sourceforge.net/maven2/"
+         contains:
+                - jwnl -> *
