@@ -15,13 +15,14 @@ Demo.initialize = function () {
   Demo.$subcontainer = $("#subcontainer");
   Demo.$formpanel = $("#demo-form-panel");
   Demo.$loading = $("<p class='loading' style='display:none'>Loading...</p>");
+  Demo.$subcontainer.append(Demo.$loading);
   google.load("visualization", "1", {packages:["corechart"]});
   $("#login-button").click(function () {
     Demo.secretSquirrel();
   });
   if (Demo.showBusinessId) {
-    Demo.showBusinessInfo(Demo.showBusinessId);
     Demo.$loading.show();
+    Demo.showBusinessInfo(Demo.showBusinessId);
   }
 };
 
@@ -45,7 +46,6 @@ Demo.runDemo = function (data) {
     history.pushState(null, null, Demo.searchHref);
     $(window).bind("popstate", Demo.popstate);
   }
-  Demo.$subcontainer.append(Demo.$loading);
   Demo.$formpanel.fadeOut(Demo.fadeTime);
   Demo.$formerrors.hide();
   Demo.$loading.fadeIn(Demo.fadeTime);
