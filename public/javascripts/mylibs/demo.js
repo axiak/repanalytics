@@ -8,6 +8,8 @@ Demo.fadeTime = 250;
 Demo.searchHref = "/demo/search/";
 Demo.selectHref = "/demo/info/";
 Demo.$results = null;
+Demo.$feedBody = null;
+Demo.feedMaxSize = 10;
 
 Demo.initialize = function () {
   Demo.$results = $("#demo-results");
@@ -132,6 +134,7 @@ Demo.demoInfo = function (response) {
   $("h2.subtitle")
     .addClass("my-restaurant")
     .html("My Restaurant - Demo");
+  Demo.$feedBody = $("#live-feed-body");
   Demo.$results.addClass("my-restaurant");
   Demo.$results.fadeIn(Demo.fadeTime,
       function () {
@@ -139,15 +142,49 @@ Demo.demoInfo = function (response) {
         Demo.drawRatingPie(response);
       }
   );
+  $("footer").hide();
   if (Demo.$results.height() > 450) {
     Demo.originalDocHeight = $("#doc2").height();
-    $("#doc2").height(Demo.$results.height() + 241);
+    $("#doc2").height(Demo.$results.height() + 300);
   }
   if (Modernizr.history) {
     history.pushState(null, null, "/demo/info/" + response[0].business.id + "/");
     $(window).bind("popstate", Demo.popstate);
   }
+
+  Demo.liveFeed(response[0].business.id);
 };
+
+Demo.liveFeed = function (id, lastTime) {
+  if (typeof(lastTime) === "undefined") {
+    lastTime = 0;
+  }
+
+  $.ajax({
+        url: "/demo/poll/",
+        data: {id: id,
+               lastDate: lastTime,
+               feedMaxSize: Demo.feedMaxSize},
+        success: function (data) {
+          return Demo.liveFeedCallback(data, id, lastTime);
+        }
+        });
+};
+
+Demo.liveFeedCallback = function (serverResponse, id, lastTime) {
+  var currentRows = Demo.$feedBody.children();
+  var totalLength = serverResponse.length + currentRows.length;
+  /*if (totalLength > Demo.feedMaxSize) {
+
+  }*/
+  $("#feed-item-tmpl").tmpl(serverResponse).prependTo(Demo.$feedBody);
+  $(".feed-item:not(:visible)", Demo.$feedBody).show();
+  if (serverResponse.length > 0) {
+    lastTime = serverResponse[0].date;
+  }
+  Demo.liveFeed(id, lastTime);
+};
+
 
 
 

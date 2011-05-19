@@ -5,25 +5,32 @@ import com.google.common.base.Predicate;
 import com.google.common.collect.Collections2;
 import models.businesses.Business;
 import models.businesses.Review;
+import org.apache.commons.lang.math.RandomUtils;
 import play.Logger;
 import play.cache.Cache;
 import service.ReviewSource;
 import service.reviews.ReviewFetcher;
 import twitter4j.*;
+import util.Strings;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 
 import static com.google.common.collect.Collections2.filter;
 
 public class TwitterService implements ReviewFetcher {
     @Nullable private Date lastMessageDate;
+    private int maxReviews = -1;
 
-    public void setLastMessageDate(@Nullable Date messageDate) {
+    public TwitterService setLastMessageDate(@Nullable Date messageDate) {
         lastMessageDate = messageDate;
+        return this;
+    }
+
+    public TwitterService setMaxReviews(int maxReviews) {
+        this.maxReviews = maxReviews;
+        return this;
     }
 
     @Override
@@ -66,7 +73,11 @@ public class TwitterService implements ReviewFetcher {
         List<Review> reviews = new ArrayList<Review>();
         Twitter twitter = new TwitterFactory().getInstance();
         try {
-            QueryResult result = twitter.search(new Query(business.name));
+            Query query = new Query(business.name + randomSpaces());
+            QueryResult result = twitter.search(query);
+            if (result.getTweets().size() > 0) {
+                Logger.info("Date: %s", result.getTweets().get(0).getCreatedAt());
+            }
             for (Tweet tweet : result.getTweets()) {
                 GeoLocation loc = tweet.getGeoLocation();
                 if (lookupDistance && loc != null) {
@@ -78,16 +89,20 @@ public class TwitterService implements ReviewFetcher {
                 review.business = business;
                 review.date = tweet.getCreatedAt();
                 reviews.add(review);
-
             }
         } catch (TwitterException e) {
             Logger.error("Twitter failed!: %s", e);
             Logger.error(e, "Could not search twitter.");
         }
+
+        if (maxReviews > 0 && reviews.size() > maxReviews) {
+            Collections.shuffle(reviews);
+            reviews = new ArrayList<Review>(reviews.subList(0, maxReviews));
+        }
         return reviews;
     }
 
-    private static class IsDateRecent implements Predicate<Review> {
+    private class IsDateRecent implements Predicate<Review> {
         private Date lastMessageDate;
 
         private IsDateRecent(Date lastMessageDate) {
@@ -98,5 +113,9 @@ public class TwitterService implements ReviewFetcher {
         public boolean apply(@Nullable Review review) {
             return review != null && review.date != null && lastMessageDate.compareTo(review.date) < 0;
         }
+    }
+
+    private String randomSpaces() {
+        return com.google.common.base.Strings.repeat(" ", RandomUtils.nextInt(250));
     }
 }

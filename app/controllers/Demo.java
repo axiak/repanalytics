@@ -2,7 +2,9 @@ package controllers;
 
 import bootstrap.JmxInitialization;
 import com.google.common.base.Predicate;
+import com.google.common.base.Strings;
 import com.google.common.collect.Collections2;
+import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
 import com.maxmind.geoip.Location;
@@ -112,12 +114,20 @@ public class Demo extends Controller {
     }
 
     public static void pollTwitterInfo(String id, long lastDate) {
+        Integer maxReviews = request.params.get("feedMaxSize", Integer.class);
         TwitterService twitterService = new TwitterService();
         twitterService.setLastMessageDate(new Date(lastDate));
         Business business = getBusinessById(id);
         ReviewFinderService service = new ReviewFinderService(twitterService, business);
         List<Review> reviews = await(service.now()).get(business);
-        renderJSON(new GsonBuilder().registerTypeAdapter(Date.class, new TimestampGsonSerializer()).create().toJson(reviews));
+        if (maxReviews != null && reviews.size() > maxReviews) {
+            reviews = new ArrayList<Review>(reviews.subList(0, maxReviews));
+        }
+        Gson pollGson = new GsonBuilder()
+                .registerTypeAdapter(Date.class, new TimestampGsonSerializer())
+                .excludeFieldsWithoutExposeAnnotation()
+                .create();
+        renderJSON(pollGson.toJson(reviews));
     }
 
 

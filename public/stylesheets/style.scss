@@ -171,6 +171,10 @@ h4 {
   font-size: 1.2em;
 }
 
+thead td {
+  @include titleFont;
+}
+
 footer {
   color: $darkgray;
   font-size: 0.7em;
@@ -521,7 +525,20 @@ h2.my-restaurant {
   position: relative;
   top: 5px;
   margin: 0 25px 0 0;
+  width: 540px;
 }
+
+.business-report .live-feed {
+  position: absolute;
+  top: 271px;
+  left: 546px;
+  width: 366px
+}
+
+#live-feed-title {
+  text-align: center;
+}
+
 .business-report th {
   font-weight: bold;
   @include titleFont;

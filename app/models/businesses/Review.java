@@ -1,5 +1,6 @@
 package models.businesses;
 
+import com.google.gson.annotations.Expose;
 import play.db.jpa.Model;
 import service.ReviewSource;
 
@@ -11,16 +12,24 @@ import java.util.Date;
 @Table(uniqueConstraints=@UniqueConstraint(columnNames = {"source", "date", "userName", "rating"}))
 public class Review extends Model implements Comparable<Review> {
     public Business business;
+    @Expose
     public Double sentiment;
+    @Expose
     @Enumerated(EnumType.STRING)
     public ReviewSource source;
+    @Expose
     public String sourceId;
+    @Expose
     public String sourceUrl;
+    @Expose
     public String userName;
     @Temporal(TemporalType.DATE)
+    @Expose
     public Date date;
     @Column(columnDefinition="TEXT")
+    @Expose
     public String text;
+    @Expose
     public Integer rating;
 
     @Override
