@@ -11,8 +11,8 @@ window.log = function(){
     var now = new Date();
     var hours = now.getHours(), minutes = now.getMinutes();
     hours = (hours < 10) ? "0" + hours : hours;
-    minutes = (minutes < 10) ? "0" + minutes : minutes;
-    return "" + now.getMonth() + "/" + now.getDay() + "/" + now.getFullYear() + " " + now.getHours() + ":" + now.getMinutes();
+    minutes = (minutes < 10) ? "0" + "" + minutes : minutes;
+    return "" + (now.getMonth() + 1) + "/" + now.getDay() + "/" + now.getFullYear() + " " + hours + ":" + minutes;
   }
 
 })(jQuery);
