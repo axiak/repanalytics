@@ -10,6 +10,7 @@ GET     /demo/search/                           Demo.search
 GET     /demo/info/                             Demo.demoInformation
 GET     /get-notified/                          Simple.notready
 GET     /demo/info/{id}/                        Demo.demoInformation
+GET     /demo/poll/                             Demo.pollTwitterInfo
 
 # Registration
 POST    /notification/email/                    Registration.registerEmail

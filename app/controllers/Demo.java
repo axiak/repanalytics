@@ -29,6 +29,7 @@ import service.search.PolyRemoteBusinessSearchBuilder;
 import service.search.RemoteBusinessSearchBuilder;
 import service.twitter.TwitterService;
 import service.yelp.YelpV2API;
+import util.TimestampGsonSerializer;
 
 import javax.annotation.Nullable;
 import javax.persistence.PersistenceException;
@@ -110,24 +111,40 @@ public class Demo extends Controller {
                    new TypeToken<F.Tuple<String, List<F.Tuple<Double, Business>>>>() {}.getType());
     }
 
+    public static void pollTwitterInfo(String id, long lastDate) {
+        TwitterService twitterService = new TwitterService();
+        twitterService.setLastMessageDate(new Date(lastDate));
+        Business business = getBusinessById(id);
+        ReviewFinderService service = new ReviewFinderService(twitterService, business);
+        List<Review> reviews = await(service.now()).get(business);
+        renderJSON(new GsonBuilder().registerTypeAdapter(Date.class, new TimestampGsonSerializer()).create().toJson(reviews));
+    }
+
+
     public static void demoInformation(String id) {
         if (!request.isAjax()) {
             renderTemplate("Demo/index.html", id);
         }
-        Business business = Cache.get("business_" + id, Business.class);
-        if (business == null) {
-            business = Business.find("byId", Long.valueOf(id)).<Business>first();
-        }
-        demoInformation(business);
+        demoInformation(getBusinessById(id));
     }
 
     private static void demoInformation(Business business) {
         List<ReviewFetcher> finders = new ArrayList<ReviewFetcher>();
-        finders.add(new YelpV2API()); finders.add(new FacebookService()); finders.add(new TwitterService());
+        finders.add(new YelpV2API());
+        //finders.add(new FacebookService());
+        finders.add(new TwitterService());
         PolyReviewFinderService service = new PolyReviewFinderService(finders,
                                                                       business);
         List<Review> reviews = await(service.now()).get(business);
         renderJSON(new GsonBuilder().setDateFormat("MM/dd/yyyy").create().toJson(reviews));
+    }
+
+    private static Business getBusinessById(String id) {
+        Business business = Cache.get("business_" + id, Business.class);
+        if (business == null) {
+            business = Business.find("byId", Long.valueOf(id)).<Business>first();
+        }
+        return business;
     }
 
 

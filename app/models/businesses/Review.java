@@ -14,6 +14,7 @@ public class Review extends Model implements Comparable<Review> {
     public Double sentiment;
     @Enumerated(EnumType.STRING)
     public ReviewSource source;
+    public String sourceId;
     public String sourceUrl;
     public String userName;
     @Temporal(TemporalType.DATE)
