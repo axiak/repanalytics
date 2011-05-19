@@ -13,6 +13,7 @@ GET     /get-notified/                          Simple.notready
 # Registration
 POST    /notification/email/                    Registration.registerEmail
 
+GET     /train-model/                           Demo.trainModel
 
 # Map static resources from the /app/public folder to the /public path
 GET     /public/                                staticDir:public

@@ -22,6 +22,8 @@ import java.io.IOException;
 import java.util.*;
 
 import service.facebook.FacebookService;
+import service.reviews.PolyReviewFinderService;
+import service.reviews.ReviewFetcher;
 import service.reviews.ReviewFinderService;
 import service.search.PolyRemoteBusinessSearchBuilder;
 import service.search.RemoteBusinessSearchBuilder;
@@ -33,6 +35,7 @@ import javax.persistence.PersistenceException;
 import static com.google.common.collect.Collections2.transform;
 import static com.maxmind.geoip.LookupService.GEOIP_MEMORY_CACHE;
 import static play.libs.Codec.hexMD5;
+import static util.NaturalLanguages.trainClassifier;
 import static util.Requests.getIpAddress;
 import static util.Requests.getRequestLocation;
 
@@ -67,6 +70,7 @@ public class Demo extends Controller {
     }
 
     public static void search() {
+
         for (String param : Arrays.asList("name", "city", "address", "state", "phone")) {
             if (request.params.get(param) == null) {
                 redirect("/demo/");
@@ -74,7 +78,7 @@ public class Demo extends Controller {
         }
         PolyRemoteBusinessSearchBuilder rbsb = new PolyRemoteBusinessSearchBuilder(new YelpV2API(), new FacebookService());
 
-        List<List<F.Tuple<Double, Business>>> businessesList = await(
+        List<F.Tuple<Double, Business>> businesses = await(
                 rbsb
                         .name(request.params.get("name"))
                         .city(request.params.get("city"))
@@ -82,14 +86,6 @@ public class Demo extends Controller {
                         .state(request.params.get("state"))
                         .phone(request.params.get("phone"))
                 .now());
-
-        /* Dumb merging strategy: Union */
-        List<F.Tuple<Double, Business>> businesses = new ArrayList<F.Tuple<Double, Business>>();
-        for (List<F.Tuple<Double, Business>> currentBusinesses : businessesList) {
-            if (currentBusinesses != null) {
-                businesses.addAll(currentBusinesses);
-            }
-        }
 
         int i=0;
         for (F.Tuple<Double, Business> business : businesses) {
@@ -122,9 +118,11 @@ public class Demo extends Controller {
     }
 
     private static void demoInformation(Business business) {
-        ReviewFinderService service = new ReviewFinderService(new YelpV2API(), business);
+        List<ReviewFetcher> finders = new ArrayList<ReviewFetcher>();
+        finders.add(new YelpV2API()); finders.add(new FacebookService());
+        PolyReviewFinderService service = new PolyReviewFinderService(finders,
+                                                                      business);
         List<Review> reviews = await(service.now()).get(business);
-        Collections.sort(reviews);
         renderJSON(new GsonBuilder().setDateFormat("MM/dd/yyyy").create().toJson(reviews));
     }
 
@@ -134,5 +132,10 @@ public class Demo extends Controller {
         public boolean apply(@Nullable F.Tuple<Double, Business> doubleBusinessTuple) {
             return doubleBusinessTuple != null && doubleBusinessTuple._1 > 0.7;
         }
+    }
+
+    public static void trainModel() {
+        trainClassifier();
+        renderText("Success!");
     }
 }

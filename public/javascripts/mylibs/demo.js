@@ -137,12 +137,28 @@ Demo.drawSentimentGraph = function (results) {
   var data = new google.visualization.DataTable();
   data.addColumn("date", "Date");
   data.addColumn("number", "Sentiment");
-  data.addRows(results.length);
+
+  var dateData = {};
+  var datesList = [];
   $.each(results, function (index, value) {
-    var dateParts = value.date.split("/");
-    data.setValue(index, 0, new Date(dateParts[2], dateParts[0], dateParts[1]));
-    data.setValue(index, 1, value.sentiment);
+    if (value.date in dateData) {
+      dateData[value.date][1] += value.sentiment;
+      dateData[value.date][2] ++;
+    } else {
+      var dateParts = value.date.split("/");
+      dateData[value.date] = [value.sentiment, 1];
+      datesList.push([value.date, new Date(~~dateParts[2], (~~dateParts[0]) - 1, ~~dateParts[1])]);
+    }
   });
+
+  data.addRows(datesList.length);
+  for (var i = datesList.length - 1, j = 0; i >= 0; i--, j++) {
+    var dateInfo = datesList[i];
+    var currentData = dateData[dateInfo[0]];
+    var avgSentiment = currentData[0] / currentData[1];
+    data.setValue(j, 0, dateInfo[1]);
+    data.setValue(j, 1, Demo.formatSentiment(avgSentiment));
+  }
   var chart = new google.visualization.LineChart($("#tab-sentiment")[0]);
   chart.draw(data, {width: 450, height: 220, title: "Review Sentiment"});
 };
@@ -155,6 +171,9 @@ Demo.drawRatingPie = function (results) {
   var histogram = {};
   var histogramLength = 0;
   $.each(results, function (index, value) {
+    if (typeof(value.rating) === "undefined") {
+      return;
+    }
     if (histogram[value.rating] === undefined) {
       histogramLength++;
       histogram[value.rating] = 1;
@@ -209,6 +228,10 @@ Demo.returnToFormPanel = function () {
     .removeClass("my-restaurant")
     .html("Demo");
 };
+
+Demo.formatSentiment = function (sentiment) {
+  return Math.round(sentiment * 100) / 100;
+}
 
 
 

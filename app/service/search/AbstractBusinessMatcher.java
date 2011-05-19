@@ -9,7 +9,6 @@ import play.libs.F;
 
 import javax.annotation.Nullable;
 import java.lang.reflect.Field;
-import java.util.Locale;
 import java.util.Map;
 
 abstract public class AbstractBusinessMatcher implements Function<Business, F.Tuple<Double, Business>> {

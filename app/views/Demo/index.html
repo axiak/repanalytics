@@ -113,7 +113,9 @@
 <script id="review-tmpl" type="text/x-jquery-tmpl">
   <tr>
     <td>{{= date}}</td>
-    <td><img src="/public/img/ratings/stars_mobile_{{= rating}}.gif" alt="{{= rating}} stars"></td>
+    <td>{{if rating }}<img src="/public/img/ratings/stars_mobile_{{= rating}}.gif" alt="{{= rating}} stars">
+        {{else}}{{= Demo.formatSentiment(sentiment)}}{{/if}}
+</td>
     <td>{{= text}}</td>
     <td><a href="{{= sourceUrl}}" target="_blank" title="Source URL"><img src="/public/img/logos/{{= source.toLowerCase()}}.gif"></a></td>
   </tr>

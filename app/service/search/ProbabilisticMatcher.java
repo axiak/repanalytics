@@ -51,7 +51,6 @@ public final class ProbabilisticMatcher extends AbstractBusinessMatcher {
 
         int denominator = bValue.length() > value.length() ? bValue.length() : value.length();
         // TODO - Use tf-idf rather than levenshtein? (with stopwords, etc)
-        Logger.info("Distance: %s", (1 - ((double)Strings.getLevenshteinDistance(value, bValue)) / denominator));
         return (1 - ((double) Strings.getLevenshteinDistance(value, bValue)) / denominator);
     }
 }

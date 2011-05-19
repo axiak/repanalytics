@@ -3,6 +3,7 @@ package service.search;
 
 import com.google.common.base.Function;
 import models.businesses.Business;
+import play.jobs.Job;
 import play.libs.F;
 
 import javax.annotation.Nonnull;
@@ -12,7 +13,7 @@ import java.util.List;
 
 import static com.google.common.collect.Collections2.transform;
 
-public class PolyRemoteBusinessSearchBuilder {
+public final class PolyRemoteBusinessSearchBuilder extends Job<List<F.Tuple<Double, Business>>> {
     List<RemoteBusinessSearchBuilder> searchBuilders;
 
     public PolyRemoteBusinessSearchBuilder(@Nonnull RemoteBusinessFinder... finders) {
@@ -67,13 +68,24 @@ public class PolyRemoteBusinessSearchBuilder {
         }
         return this;
     }
-
-    @SuppressWarnings("unchecked")
-    public F.Promise<List<List<F.Tuple<Double, Business>>>> now() {
-        return F.Promise.waitAll(
+    @Override
+    public List<F.Tuple<Double, Business>> doJobWithResult() throws Exception {
+        @SuppressWarnings("unchecked")
+        List<List<F.Tuple<Double, Business>>> results = (List)F.Promise.waitAll(
                 transform(searchBuilders, new FinderToPromise()).toArray(new F.Promise[searchBuilders.size()])
-                );
+                ).get();
+        return mergeResults(results);
+    }
 
+    private List<F.Tuple<Double, Business>> mergeResults(List<List<F.Tuple<Double, Business>>> results) {
+        /* Dumb merging strategy: Union */
+        List<F.Tuple<Double, Business>> businesses = new ArrayList<F.Tuple<Double, Business>>();
+        for (List<F.Tuple<Double, Business>> currentBusinesses : results) {
+            if (currentBusinesses != null) {
+                businesses.addAll(currentBusinesses);
+            }
+        }
+        return businesses;
     }
 
     private static class FinderToPromise implements Function<RemoteBusinessSearchBuilder, F.Promise<List<F.Tuple<Double, Business>>>> {

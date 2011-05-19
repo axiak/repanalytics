@@ -58,13 +58,17 @@ public class NaturalLanguages {
 
         int i = 0;
         double average = 0, denominator = 0;
-        for (double dimensionValue : categorizer.categorize(tokenizeString(text))) {
+        double[] categorization = categorizer.categorize(tokenizeString(text));
+        for (double dimensionValue : categorization) {
             double weight = Math.pow(dimensionValue, 5);
             average += weight * Integer.valueOf(categorizer.getCategory(i));
             denominator += weight;
             i++;
         }
+
         average /= denominator;
+
+        Logger.info("Classification of %s: %s [%s]", Arrays.toString(categorization), average - 3, text);
 
         return average - 3;
     }
@@ -108,7 +112,8 @@ public class NaturalLanguages {
         }
         BufferedOutputStream out = null;
         try {
-            out = new BufferedOutputStream(new FileOutputStream("/tmp/en-classifier"));
+            out = new BufferedOutputStream(new FileOutputStream(
+                    new File(new File(Play.applicationPath, "dat"), "en-classifier.bin")));
             assert model != null;
             model.serialize(out);
         } catch (FileNotFoundException e) {
