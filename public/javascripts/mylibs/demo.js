@@ -15,6 +15,10 @@ Demo.initialize = function () {
   Demo.$subcontainer = $("#subcontainer");
   Demo.$formpanel = $("#demo-form-panel");
   Demo.$loading = $("<p class='loading' style='display:none'>Loading...</p>");
+  google.load("visualization", "1", {packages:["corechart"]});
+  $("#login-button").click(function () {
+    Demo.secretSquirrel();
+  });
 };
 
 Demo.runDemo = function (data) {
@@ -115,14 +119,79 @@ Demo.disambiguate = function (inputData, response) {
 Demo.demoInfo = function (response) {
   Demo.$results.html('');
   $("#business-report").tmpl(response[0].business).appendTo(Demo.$results);
-  $("#review-tmpl").tmpl(response).appendTo($("table.business-reviews tbody:first"));
-  $(".chart-tabs").tabs();
+  $("#review-tmpl").tmpl(response).appendTo("table.business-reviews tbody:first");
+  $("div.chart-tabs").tabs();
   $("h2.subtitle")
     .addClass("my-restaurant")
     .html("My Restaurant - Demo");
   Demo.$results.addClass("my-restaurant");
-  Demo.$results.fadeIn(Demo.fadeTime);
+  Demo.$results.fadeIn(Demo.fadeTime,
+      function () {
+        Demo.drawSentimentGraph(response);
+        Demo.drawRatingPie(response);
+      }
+  );
 };
+
+Demo.drawSentimentGraph = function (results) {
+  var data = new google.visualization.DataTable();
+  data.addColumn("date", "Date");
+  data.addColumn("number", "Sentiment");
+  data.addRows(results.length);
+  $.each(results, function (index, value) {
+    var dateParts = value.date.split("/");
+    data.setValue(index, 0, new Date(dateParts[2], dateParts[0], dateParts[1]));
+    data.setValue(index, 1, value.sentiment);
+  });
+  var chart = new google.visualization.LineChart($("#tab-sentiment")[0]);
+  chart.draw(data, {width: 450, height: 220, title: "Review Sentiment"});
+};
+
+Demo.drawRatingPie = function (results) {
+  var data = new google.visualization.DataTable();
+  data.addColumn('string', 'Rating');
+  data.addColumn("number", "Review Popularity");
+
+  var histogram = {};
+  var histogramLength = 0;
+  $.each(results, function (index, value) {
+    if (histogram[value.rating] === undefined) {
+      histogramLength++;
+      histogram[value.rating] = 1;
+    } else {
+      histogram[value.rating] ++;
+    }
+  });
+  data.addRows(histogramLength);
+  var idx = 0;
+  $.each(histogram, function (rating, num) {
+    data.setValue(idx, 0, "" + rating + " star" + (rating == 1 ? "" : "s"));
+    data.setValue(idx, 1, num);
+    idx++;
+  });
+  var chart = new google.visualization.PieChart($("#tab-ratings")[0]);
+  chart.draw(data, {width: 450, height: 220, title: "Rating Breakdown"});
+};
+
+Demo.secretSquirrel = function () {
+  if (!Demo.$formpanel.is(":visible")) {
+    return;
+  }
+  var data = {
+    "name": "Cheesecake Factory",
+    "address": "100 Cambridgeside Pl",
+    "city": "Cambridge",
+    "state": "MA",
+    "zip": "02138"
+  };
+  $.each(data, function (key, value) {
+    $("#demo-" + key)
+        .trigger("focus")
+        .val(value)
+        .trigger("blur");
+  });
+  $("#chain").attr({"checked": "checked"});
+}
 
 
 Demo.popstate = function (e) {

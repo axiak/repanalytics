@@ -1,9 +1,16 @@
 #{extends 'main.html' /}
 #{set title:'Demo' /}
+
+#{set 'headScripts'}
+<script type="text/javascript" src="//www.google.com/jsapi"></script>
+<script type="text/javascript">
+  google.load("visualization", "1", {packages:["corechart"]});
+</script>
+#{/set}
+
 #{set 'moreScripts'}
 #{script 'mylibs/demo.js' /}
 #{/set}
-
 
 <div id="subcontainer">
 <div id="demo-results"></div>
@@ -26,7 +33,7 @@
       <span class="require-info">*</span>
       <input type="text" name="city" placeholder="City" id="demo-city"
                      title="City" class="placeholder required" value="">
-      <select class="required" name="state">
+      <select class="required" name="state" id="demo-state">
             <option value="">State</option>
             <option value="">-----</option>
             #{list items:states, as:'state' }
@@ -80,10 +87,8 @@
           <li><a href="#tab-ratings">Ratings</a></li>
         </ul>
         <div id="tab-sentiment">
-          -- SENTIMENT GRAPH HERE --
         </div>
         <div id="tab-ratings">
-          -- RATING GRAPH HERE --
         </div>
       </div>
     </div>
@@ -103,6 +108,7 @@
     </table>
   </div>
 </script>
+
 
 <script id="review-tmpl" type="text/x-jquery-tmpl">
   <tr>

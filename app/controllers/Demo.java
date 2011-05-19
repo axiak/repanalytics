@@ -21,7 +21,9 @@ import java.io.File;
 import java.io.IOException;
 import java.util.*;
 
+import service.facebook.FacebookService;
 import service.reviews.ReviewFinderService;
+import service.search.PolyRemoteBusinessSearchBuilder;
 import service.search.RemoteBusinessSearchBuilder;
 import service.yelp.YelpV2API;
 
@@ -65,19 +67,29 @@ public class Demo extends Controller {
     }
 
     public static void search() {
-        RemoteBusinessSearchBuilder rbsb = new RemoteBusinessSearchBuilder(new YelpV2API());
         for (String param : Arrays.asList("name", "city", "address", "state", "phone")) {
             if (request.params.get(param) == null) {
                 redirect("/demo/");
             }
         }
-        List<F.Tuple<Double, Business>> businesses = new ArrayList<F.Tuple<Double, Business>>(Collections2.filter(await(rbsb
-                .name(request.params.get("name"))
-                .city(request.params.get("city"))
-                .address(request.params.get("address"))
-                .state(request.params.get("state"))
-                .phone(request.params.get("phone"))
-                .now()), new IsBusinessWellMatched()));
+        PolyRemoteBusinessSearchBuilder rbsb = new PolyRemoteBusinessSearchBuilder(new YelpV2API(), new FacebookService());
+
+        List<List<F.Tuple<Double, Business>>> businessesList = await(
+                rbsb
+                        .name(request.params.get("name"))
+                        .city(request.params.get("city"))
+                        .address(request.params.get("address"))
+                        .state(request.params.get("state"))
+                        .phone(request.params.get("phone"))
+                .now());
+
+        /* Dumb merging strategy: Union */
+        List<F.Tuple<Double, Business>> businesses = new ArrayList<F.Tuple<Double, Business>>();
+        for (List<F.Tuple<Double, Business>> currentBusinesses : businessesList) {
+            if (currentBusinesses != null) {
+                businesses.addAll(currentBusinesses);
+            }
+        }
 
         int i=0;
         for (F.Tuple<Double, Business> business : businesses) {

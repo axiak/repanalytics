@@ -477,7 +477,7 @@ p.loading {
 }
 
 .business-report .chart-tabs {
-  height: 234px;
+  height: 260px;
 }
 
 h2.my-restaurant {
@@ -541,4 +541,8 @@ h2.my-restaurant {
   left: 500px;
   font-style: italic;
   font-size: 1.1em;
+}
+
+#tab-sentiment, #tab-ratings {
+  padding: 0;
 }

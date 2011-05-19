@@ -3,6 +3,7 @@ package service.yelp;
 import com.google.common.base.Joiner;
 import com.google.common.collect.ImmutableMap;
 import com.google.gson.*;
+import com.google.gson.stream.MalformedJsonException;
 import com.google.i18n.phonenumbers.NumberParseException;
 import com.google.i18n.phonenumbers.PhoneNumberUtil;
 import com.yelp.v2.YelpSearchResult;
@@ -27,6 +28,7 @@ import service.search.RemoteBusinessFinder;
 
 import javax.annotation.Nonnull;
 import java.util.*;
+import java.util.logging.LoggingMXBean;
 
 import static play.libs.Codec.hexMD5;
 import static util.Strings.normalizePhone;
@@ -61,8 +63,14 @@ public class YelpV2API implements YelpAPI, RemoteBusinessFinder, PhoneBusinessSe
         oAuthInfo._1.signRequest(oAuthInfo._2, request);
 
         Response response = request.send();
-        return gson.fromJson(response.getBody(),
-                             YelpSearchResult.class);
+        try {
+            return gson.fromJson(response.getBody(),
+                                 YelpSearchResult.class);
+        } catch (Throwable t) {
+            Logger.error(t, "Error in yelp response!");
+            Logger.error("Error parsing response: %s", response.getBody());
+        }
+        return null;
     }
 
     @Override
@@ -125,6 +133,11 @@ public class YelpV2API implements YelpAPI, RemoteBusinessFinder, PhoneBusinessSe
                 "limit", "20"));
 
         businesses = new ArrayList<Business>();
+
+        if (result == null) {
+            return businesses;
+        }
+
         for (com.yelp.v2.Business business : result.getBusinesses()) {
             YelpBusiness mBusiness = new YelpBusiness();
             mBusiness.address = Joiner.on(", ").skipNulls().join(business.getLocation().getAddress());
@@ -167,8 +180,13 @@ public class YelpV2API implements YelpAPI, RemoteBusinessFinder, PhoneBusinessSe
         }
 
         Cache.set("yelp_reviews_" + business.yelpId, response, "1440mn");
+        JsonElement element = null;
 
-        JsonElement element = new JsonParser().parse(response);
+        try {
+            element = new JsonParser().parse(response);
+        } catch (Throwable e) {
+            Logger.info("Could not parse json: %s", response);
+        }
 
         JsonArray jsonReviews = element.getAsJsonObject().get("reviews").getAsJsonArray();
         List<Review> reviews = new ArrayList<Review>();
