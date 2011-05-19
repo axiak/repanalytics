@@ -198,25 +198,26 @@ Demo.drawRatingPie = function (results) {
   data.addColumn("number", "Review Popularity");
 
   var histogram = {};
-  var histogramLength = 0;
+  var histogramKeys = [];
   $.each(results, function (index, value) {
     if (typeof(value.rating) === "undefined") {
       return;
     }
     if (histogram[value.rating] === undefined) {
-      histogramLength++;
+      histogramKeys.push(value.rating);
       histogram[value.rating] = 1;
     } else {
       histogram[value.rating] ++;
     }
   });
-  data.addRows(histogramLength);
-  var idx = 0;
-  $.each(histogram, function (rating, num) {
-    data.setValue(idx, 0, "" + rating + " star" + (rating == 1 ? "" : "s"));
-    data.setValue(idx, 1, num);
-    idx++;
-  });
+  var histogramKeysLength = histogramKeys.length;
+  histogramKeys.sort();
+  data.addRows(histogramKeysLength);
+  for (var i = 0; i < histogramKeysLength; i++) {
+    var rating = histogramKeys[i];
+    data.setValue(i, 0, "" + rating + " star" + (rating == 1 ? "" : "s"));
+    data.setValue(i, 1, histogram[rating]);
+  }
   var chart = new google.visualization.PieChart($("#tab-ratings")[0]);
   chart.draw(data, {width: 450, height: 220, title: "Rating Breakdown", is3D: true, chartArea: {
         top: 8, left: 45, height: 220, width: 800
