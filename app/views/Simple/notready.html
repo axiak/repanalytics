@@ -7,13 +7,16 @@ We're making it easier to see your online presence.
 
 <br>
 <p>
-Get notified when you can use ${play.Play.configuration.getProperty("application.name", "Reputation Manager")}:
+To learn more about ${play.Play.configuration.getProperty("application.name", "Reputation Manager")} and to be notified when it will be available:
 </p>
 
 <br>
 <div id="notify-container">
     <div class="notify-block" id="notify-form">
       <form action="" method="POST" name="email-preview" id="email-preview">
+        <input id="get-name" type="text" placeholder="What's your name?"
+                       title="What's your name?" class="placeholder">
+        <br>
         <input id="get-notified" type="text" placeholder="What's your email address?"
                  title="What's your email address?" class="placeholder">
         <input id="num-locations" type="text" placeholder="Number of Locations" name="locations"

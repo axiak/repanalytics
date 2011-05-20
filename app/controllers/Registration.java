@@ -24,6 +24,8 @@ public class Registration extends Controller {
             }
         }
 
+        String name = request.params.get("name");
+
         validation.email(email);
         if (validation.errorsMap().size() > 0) {
             Logger.debug("Invalid email address: '%s'", email);
@@ -32,6 +34,7 @@ public class Registration extends Controller {
         try {
             SeedUser user = new SeedUser();
             user.email = email;
+            user.fullName = name;
             user.ipAddress = getIpAddress(request);
             user.userAgent = (request.headers.get("user-agent") == null) ? "" : request.headers.get("user-agent").value();
             user.numberLocations = numberLocations;
