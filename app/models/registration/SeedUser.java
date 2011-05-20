@@ -16,6 +16,7 @@ public class SeedUser extends Model {
     public String ipAddress;
     public String userAgent;
     public Integer numberLocations;
+    public String fullName;
 
     @Override
     public <T extends JPABase> T save() {
