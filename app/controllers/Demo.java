@@ -153,6 +153,7 @@ public class Demo extends Controller {
         Business business = Cache.get("business_" + id, Business.class);
         if (business == null) {
             business = Business.find("byId", Long.valueOf(id)).<Business>first();
+            Cache.set("business_" + id, business);
         }
         return business;
     }
