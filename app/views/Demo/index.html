@@ -115,14 +115,14 @@
           </th>
         </tr>
         <tr>
-          <td colspan="3">
+          <td colspan="3" id="feed-aggregate">
             Aggregate data loading...
           </td>
         </tr>
         <tr>
           <td>Good/Bad?</td>
-          <td>Text</td>
-          <td>Source</td>
+          <td width="200">Text</td>
+          <td width="70">Source</td>
         </tr>
       </thead>
       <tbody>
@@ -149,10 +149,17 @@
 </script>
 
 <script id="feed-item-tmpl" type="text/x-jquery-tmpl">
-  <div class="feed-item" style="display: none">
-    {{= rating}}<br>
-    {{= text}}<br>
-    <a href="{{= sourceUrl}}" target="_blank" title="Source URL"><img src="/public/img/logos/{{= source.toLowerCase()}}.gif"></a>
+  <div class="feed-item" style="display: none" id="review-{{= id}}">
+    {{if Demo.isSad(rating) }}<div class="sad emote">:-(</div>
+    {{else}}
+      {{if Demo.isNeutral(rating) }}
+         <div class="neutral emote">:-|</div>
+      {{else}}
+         <div class="happy emote">:-)</div>
+      {{/if}}
+    {{/if}}
+    <div class="tweet-text">{{= text}}</div>
+    <a class="tweet-source" href="{{= sourceUrl}}" target="_blank" title="Source URL"><img src="/public/img/logos/{{= source.toLowerCase()}}.gif"></a>
   </div>
 </script>
 

@@ -116,13 +116,13 @@ public class Demo extends Controller {
     public static void pollTwitterInfo(String id, long lastDate) {
         Integer maxReviews = request.params.get("feedMaxSize", Integer.class);
         TwitterService twitterService = new TwitterService();
-        twitterService.setLastMessageDate(new Date(lastDate));
+        if (lastDate != 0) {
+            twitterService.setIsStreaming(true);
+        }
+        twitterService.setMaxReviews(maxReviews);
         Business business = getBusinessById(id);
         ReviewFinderService service = new ReviewFinderService(twitterService, business);
         List<Review> reviews = await(service.now()).get(business);
-        if (maxReviews != null && reviews.size() > maxReviews) {
-            reviews = new ArrayList<Review>(reviews.subList(0, maxReviews));
-        }
         Gson pollGson = new GsonBuilder()
                 .registerTypeAdapter(Date.class, new TimestampGsonSerializer())
                 .excludeFieldsWithoutExposeAnnotation()
@@ -141,8 +141,8 @@ public class Demo extends Controller {
     private static void demoInformation(Business business) {
         List<ReviewFetcher> finders = new ArrayList<ReviewFetcher>();
         finders.add(new YelpV2API());
-        //finders.add(new FacebookService());
-        finders.add(new TwitterService());
+        finders.add(new FacebookService());
+        //finders.add(new TwitterService().setMaxReviews(3));
         PolyReviewFinderService service = new PolyReviewFinderService(finders,
                                                                       business);
         List<Review> reviews = await(service.now()).get(business);

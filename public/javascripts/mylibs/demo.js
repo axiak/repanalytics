@@ -9,7 +9,8 @@ Demo.searchHref = "/demo/search/";
 Demo.selectHref = "/demo/info/";
 Demo.$results = null;
 Demo.$feedBody = null;
-Demo.feedMaxSize = 10;
+Demo.$feedStats = [0, 0, 0];
+Demo.feedMaxSize = 8;
 
 Demo.initialize = function () {
   Demo.$results = $("#demo-results");
@@ -136,6 +137,7 @@ Demo.demoInfo = function (response) {
     .html("My Restaurant - Demo");
   Demo.$feedBody = $("#live-feed-body");
   Demo.$results.addClass("my-restaurant");
+  Demo.$feedAggregate = $("#feed-aggregate");
   Demo.$results.fadeIn(Demo.fadeTime,
       function () {
         Demo.drawSentimentGraph(response);
@@ -174,17 +176,53 @@ Demo.liveFeed = function (id, lastTime) {
 Demo.liveFeedCallback = function (serverResponse, id, lastTime) {
   var currentRows = Demo.$feedBody.children();
   var totalLength = serverResponse.length + currentRows.length;
-  /*if (totalLength > Demo.feedMaxSize) {
 
-  }*/
-  $("#feed-item-tmpl").tmpl(serverResponse).prependTo(Demo.$feedBody);
-  $(".feed-item:not(:visible)", Demo.$feedBody).show();
+
+  var currentWait = 0;
+  for (var i = serverResponse.length - 1; i >= 0; i--) {
+    var item = [serverResponse[i]];
+    item[0].id = Math.round(Math.random() * 10000);
+    $("#feed-item-tmpl").tmpl(item).prependTo(Demo.$feedBody);
+    setTimeout((function (id) {
+      return function () {
+        if ($(".feed-item:visible").length >= Demo.feedMaxSize) {
+          $(".feed-item:last").fadeOut("slow");
+        }
+        $("#review-" + id).fadeIn("slow");
+        var stats = Demo.$feedStats;
+        var $this = $(this);
+        if ($this.hasClass("happy")) {
+          stats[0] ++;
+        } else if ($this.hasClass("neutral")) {
+          stats[1] ++;
+        } else {
+          stats[2] ++;
+        }
+        var total = stats[0] + stats[1] + stats[2];
+        var percent = (stats[0] / (total));
+        percent = Math.round(percent * 10000) / 100;
+        Demo.$feedAggregate.text("" + total + " total: " + stats[2] + " bad, " + stats[1] + " neutral, " + stats[0] + " good: " + percent + "% good");
+      }})(item[0].id), currentWait);
+    currentWait += 2500;
+  }
+
   if (serverResponse.length > 0) {
     lastTime = serverResponse[0].date;
   }
   Demo.liveFeed(id, lastTime);
 };
 
+Demo.isSad = function (rating) {
+  return rating < 2;
+};
+
+Demo.isNeutral = function (rating) {
+  return rating < 4;
+};
+
+Demo.isHappy = function (rating) {
+  return rating >= 4;
+};
 
 
 
