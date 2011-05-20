@@ -188,9 +188,8 @@ Demo.liveFeedCallback = function (serverResponse, id, lastTime) {
         if ($(".feed-item:visible").length >= Demo.feedMaxSize) {
           $(".feed-item:last").fadeOut("slow");
         }
-        $("#review-" + id).fadeIn("slow");
+        var $this = $("#review-" + id).fadeIn("slow").find(".emote:first");
         var stats = Demo.$feedStats;
-        var $this = $(this);
         if ($this.hasClass("happy")) {
           stats[0] ++;
         } else if ($this.hasClass("neutral")) {
