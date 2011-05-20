@@ -7,10 +7,13 @@ import models.businesses.Business;
 import models.businesses.Review;
 import org.apache.commons.lang.math.RandomUtils;
 import play.Logger;
+import play.Play;
 import play.cache.Cache;
 import service.ReviewSource;
 import service.reviews.ReviewFetcher;
 import twitter4j.*;
+import twitter4j.conf.Configuration;
+import twitter4j.conf.ConfigurationBuilder;
 import util.Strings;
 
 import javax.annotation.Nonnull;
@@ -18,10 +21,25 @@ import javax.annotation.Nullable;
 import java.util.*;
 
 import static com.google.common.collect.Collections2.filter;
+import static play.libs.Codec.decodeBASE64;
 
 public class TwitterService implements ReviewFetcher {
     @Nullable private Date lastMessageDate;
     private int maxReviews = -1;
+
+    private static Configuration getTwitterConfiguration() {
+        Properties conf = Play.configuration;
+        return new ConfigurationBuilder()
+                .setOAuthAccessToken(conf.getProperty("twitter.oauth.accessToken"))
+                .setOAuthAccessTokenSecret(conf.getProperty("twitter.oauth.accessTokenSecret"))
+                .setOAuthConsumerKey(conf.getProperty("twitter.oauth.consumerKey"))
+                .setOAuthConsumerSecret(conf.getProperty("twitter.oauth.consumerSecret"))
+                .setUser(conf.getProperty("twitter.user"))
+                .setPassword(new String(decodeBASE64(conf.getProperty("twitter.password.base64"))))
+                .setPrettyDebugEnabled(true)
+                .setDebugEnabled(true)
+                .build();
+    }
 
     public TwitterService setLastMessageDate(@Nullable Date messageDate) {
         lastMessageDate = messageDate;
@@ -36,17 +54,7 @@ public class TwitterService implements ReviewFetcher {
     @Override
     public List<Review> getReviews(@Nonnull Business business) {
         if (lastMessageDate != null) {
-            /* This is a streaming request. */
-            List<Review> reviews;
-            int i = 0;
-            while ((reviews = getReviewsFiltered(lastMessageDate, business)).size() == 0 && (i++ < 20)) {
-                try {
-                    Thread.sleep(750L);
-                } catch (InterruptedException e) {
-                    Logger.warn("Thread interrupted in getReviews!");
-                }
-            }
-            return reviews;
+            return getReviewsFiltered(lastMessageDate, business);
         } else {
             String cacheKey = "twitter_reviews_" + business.id;
             @SuppressWarnings("unchecked")
@@ -60,8 +68,33 @@ public class TwitterService implements ReviewFetcher {
     }
 
     private List<Review> getReviewsFiltered(@Nonnull final Date lastMessageDate, @Nonnull Business business) {
-        Logger.info("Message date: %s", lastMessageDate);
-        return new ArrayList<Review>(filter(getReviewsActual(business), new IsDateRecent(lastMessageDate)));
+        TwitterStream twitterStream = new TwitterStreamFactory(getTwitterConfiguration()).getInstance();
+        List<Review> reviews = new ArrayList<Review>();
+        try {
+            twitterStream.addListener(new BusinessStatusListener());
+            twitterStream.filter(new FilterQuery().track(new String[]{business.name}));
+        } catch (TwitterStatuses statusException) {
+            List<Status> statuses = statusException.getStatuses();
+            for (Status status : statuses) {
+                Review review = new Review();
+                review.text = status.getText();
+                review.source = ReviewSource.TWITTER;
+                review.userName = status.getUser().getName();
+                review.sourceUrl = "http://www.twitter.com/" + review.userName;
+                review.business = business;
+                review.date = status.getCreatedAt();
+                reviews.add(review);
+            }
+        }
+
+        Logger.info("Left status filterrer...sleeping");
+        try {
+            Thread.sleep(1000);
+        } catch (InterruptedException e) {
+            e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+        }
+        twitterStream.shutdown();
+        return reviews;
     }
 
     private List<Review> getReviewsActual(@Nonnull Business business) {
@@ -71,7 +104,7 @@ public class TwitterService implements ReviewFetcher {
         boolean lookupDistance = business.latitude != null && business.longitude != null;
 
         List<Review> reviews = new ArrayList<Review>();
-        Twitter twitter = new TwitterFactory().getInstance();
+        Twitter twitter = new TwitterFactory(getTwitterConfiguration()).getInstance();
         try {
             Query query = new Query(business.name + randomSpaces());
             QueryResult result = twitter.search(query);
@@ -102,7 +135,7 @@ public class TwitterService implements ReviewFetcher {
         return reviews;
     }
 
-    private class IsDateRecent implements Predicate<Review> {
+    public class IsDateRecent implements Predicate<Review> {
         private Date lastMessageDate;
 
         private IsDateRecent(Date lastMessageDate) {
@@ -112,6 +145,44 @@ public class TwitterService implements ReviewFetcher {
         @Override
         public boolean apply(@Nullable Review review) {
             return review != null && review.date != null && lastMessageDate.compareTo(review.date) < 0;
+        }
+    }
+
+    public class BusinessStatusListener implements StatusListener {
+        @Override
+        public void onStatus(Status status) {
+            Logger.error("Received status!!");
+            //throw new TwitterStatuses(Arrays.asList(status));
+        }
+
+        @Override
+        public void onDeletionNotice(StatusDeletionNotice statusDeletionNotice) {
+        }
+
+        @Override
+        public void onTrackLimitationNotice(int i) {
+        }
+
+        @Override
+        public void onScrubGeo(long l, long l1) {
+        }
+
+        @Override
+        public void onException(Exception e) {
+            //Logger.error(e,  "Error with twitter streaming api.");
+            //Logger.error("Error: %s", e);
+            e.printStackTrace();
+        }
+    }
+
+    public class TwitterStatuses extends RuntimeException {
+        private List<Status> statuses;
+        public TwitterStatuses(List<Status> statuses) {
+            this.statuses = statuses;
+        }
+
+        public List<Status> getStatuses() {
+            return this.statuses;
         }
     }
 

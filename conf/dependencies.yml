@@ -14,6 +14,7 @@ require:
     - com.restfb -> restfb 1.6.4
     - org.apache.opennlp -> opennlp-tools 1.5.1-incubating
     - org.twitter4j -> twitter4j-core [2.1,)
+    - org.twitter4j -> twitter4j-stream [2.1,)
 
 
 repositories:
