@@ -451,6 +451,41 @@ p.loading {
   top: 224px;
 }
 
+.emote {
+  width: 73px;
+  border-right: 1px solid $borderBlue;
+  height: 100%;
+  float: left;
+  margin-right: 3px;
+  font-size: 2em;
+  padding-left: 0;
+  text-align: center;
+  @include titleFont;
+}
+
+.tweet-source {
+  display: block;
+  float: right;
+}
+
+.feed-item {
+  height: 100px;
+}
+
+.happy {
+  color: #090;
+}
+
+.sad {
+  color: #009;
+}
+
+.neutral {
+  color: $black;
+}
+
+
+
 #demo-results .business {
   width: 416px;
   border: 1px solid $borderBlue;
