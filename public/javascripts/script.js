@@ -80,9 +80,12 @@ $(function () {
     $(this).addClass("disabled");
   });
 
-  $("#slideshow").cycle({
-        pause: 0,
-        speed: 2500
-      });
+  var $slideShow = $("#slideshow:first");
+  if ($slideShow.length) {
+    $("#slideshow").cycle({
+          pause: 0,
+          speed: 2500
+        });
+  }
 });
 

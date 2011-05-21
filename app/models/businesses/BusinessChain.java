@@ -11,7 +11,7 @@ import javax.persistence.Entity;
 @Entity
 public class BusinessChain extends Model {
     @Column(unique=true)
-    String name;
+    public String name;
 
     public BusinessChain(String name) {
         this.name = name;

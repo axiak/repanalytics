@@ -79,58 +79,63 @@
 </script>
 
 <script id="business-report" type="text/x-jquery-tmpl">
-  <div class="business-report">
-    <div class="chart-panel">
-      <div class="chart-tabs">
-        <ul>
-          <li><a href="#tab-sentiment">Sentiments</a></li>
-          <li><a href="#tab-ratings">Ratings</a></li>
-        </ul>
-        <div id="tab-sentiment">
-        </div>
-        <div id="tab-ratings">
+  <div class="business-report" id="business-report-panel">
+    <div id="business-report-top">
+      <div class="chart-panel">
+        <div class="chart-tabs">
+          <ul>
+            <li><a href="#tab-sentiment">Sentiments</a></li>
+            <li><a href="#tab-ratings">Ratings</a></li>
+          </ul>
+          <div id="tab-sentiment">
+          </div>
+          <div id="tab-ratings">
+          </div>
         </div>
       </div>
+      <p class="data-disclaimer">Last updated: {{= $.prettyDate() }}</p>
+      {{tmpl "#disambiguate-business"}}
+      <div style="clear: both;"></div>
     </div>
-    <p class="data-disclaimer">Last updated: {{= $.prettyDate() }}</p>
-    {{tmpl "#disambiguate-business"}}
-    <span style="clear: both"></span>
-    <table class="business-reviews">
-      <thead>
-        <th>Date</th>
-        <th>Rating</th>
-        <th>Review Excerpt</th>
-        <th>Source</th>
-      </thead>
-      <tbody>
+    <div id="business-report-bottom">
+      <table class="business-reviews">
+        <thead>
+          <th>Date</th>
+          <th>Rating</th>
+          <th>Review Excerpt</th>
+          <th>Source</th>
+        </thead>
+        <tbody>
 
-      </tbody>
-    </table>
+        </tbody>
+      </table>
 
-    <table class="live-feed">
-      <thead>
-        <tr>
-          <th colspan="3" id="live-feed-title">
-            Live Analysis
-          </th>
-        </tr>
-        <tr>
-          <td colspan="3" id="feed-aggregate">
-            Aggregate data loading...
-          </td>
-        </tr>
-        <tr>
-          <td>Good/Bad?</td>
-          <td width="200">Text</td>
-          <td width="70">Source</td>
-        </tr>
-      </thead>
-      <tbody>
-      <td colspan="3" id="live-feed-body">
+      <table class="live-feed">
+        <thead>
+          <tr>
+            <th colspan="3" id="live-feed-title">
+              Live Analysis
+            </th>
+          </tr>
+          <tr>
+            <td colspan="3" id="feed-aggregate">
+              Aggregate data loading...
+            </td>
+          </tr>
+          <tr>
+            <td>Good/Bad?</td>
+            <td width="200" style="border-right:  none;">Text</td>
+            <td width="70" style="border-left:  none; text-align: right; padding-right: 8px;">Source</td>
+          </tr>
+        </thead>
+        <tbody>
+        <td colspan="3" id="live-feed-body">
 
-      </td>
-      </tbody>
-    </table>
+        </td>
+        </tbody>
+      </table>
+      <div style="clear:both"></div>
+    </div>
   </div>
 </script>
 
@@ -158,8 +163,11 @@
          <div class="happy emote">:-)</div>
       {{/if}}
     {{/if}}
-    <div class="tweet-text">{{= text}}</div>
-    <a class="tweet-source" href="{{= sourceUrl}}" target="_blank" title="Source URL"><img src="/public/img/logos/{{= source.toLowerCase()}}.gif"></a>
+    <div class="tweet-text">
+      <a class="tweet-source" href="{{= sourceUrl}}" target="_blank" title="Source URL"><img src="/public/img/logos/{{= source.toLowerCase()}}.gif"></a>
+      {{= text}}
+    </div>
+
   </div>
 </script>
 

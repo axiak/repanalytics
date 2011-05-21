@@ -110,7 +110,7 @@ html {
   height: auto;
 }
 
-.ie6 #main, .ie7 #main, .ie8 #main {
+.ie6 #main {
   height: 40em;
 }
 
@@ -359,7 +359,7 @@ h2, h3, h4, h5, h6, nav a, th {
 }
 
 .yui-g {
-  padding: 20px 20px 0 20px;
+  padding: 20px 5px 0 5px;
 }
 
 h2.subtitle {
@@ -447,8 +447,8 @@ p.loading {
 
 #demo-results {
   display: none;
-  position: absolute;
   top: 224px;
+  width: 100%;
 }
 
 .emote {
@@ -460,16 +460,17 @@ p.loading {
   font-size: 2em;
   padding-left: 0;
   text-align: center;
+  /*padding-top: 12px;*/
   @include titleFont;
 }
 
 .tweet-source {
-  display: block;
   float: right;
 }
 
 .feed-item {
-  height: 100px;
+  height: 70px;
+  border-bottom: 1px solid $borderBlue;
 }
 
 .happy {
@@ -505,7 +506,7 @@ p.loading {
 
 .ie8 #demo-results .business {
   margin-left: 60px;
-  padding:  0;
+  padding:  5px;
 }
 
 #demo-results .highlighted {
@@ -529,23 +530,51 @@ p.loading {
   margin:  30px;
 }
 
-.business-report .business {
-  float: right;
-  clear: none;
-  position: relative;
-  top: 60px;
-  left: -25px;
-}
 
-
-.ie7 .business-report .business, .ie8 .business-report .business {
-  left: -40px;
-}
 
 .business-report .chart-panel {
   float: left;
   width: 462px;
   clear: none;
+}
+
+#business-report-top {
+  width: 100%;
+  overflow: auto;
+}
+
+.ie6 #business-report-top {
+  overflow: visible;
+}
+
+#business-report-top .business {
+  float:right;
+  margin: 22px 0 0;
+  cursor: default !important;
+}
+
+.ie8 #business-report-top .business {
+  margin: 22px 0 0;
+  padding: 5px;
+}
+
+#business-report-bottom {
+  margin: 3px 0 10px;
+  width: 100%;
+  overflow: auto;
+}
+
+.ie6 #business-report-bottom {
+  overflow: visible;
+}
+
+#business-report-bottom .business-reviews {
+  float: left;
+}
+
+#business-report-bottom .live-feed {
+  float: right;
+  width: 390px;
 }
 
 .business-report .chart-tabs {
@@ -559,20 +588,9 @@ h2.my-restaurant {
 }
 
 .business-report table.business-reviews {
-  clear: both;
   @include rounded-corners(3px);
   @include shadow($borderBlue, 2px, 2px, 3px);
-  position: relative;
-  top: 5px;
-  margin: 0 25px 0 0;
   width: 540px;
-}
-
-.business-report .live-feed {
-  position: absolute;
-  top: 271px;
-  left: 546px;
-  width: 366px
 }
 
 #live-feed-title {
@@ -582,10 +600,6 @@ h2.my-restaurant {
 .business-report th {
   font-weight: bold;
   @include titleFont;
-}
-
-.ie7 table.business-reviews, .ie8 table.business-reviews {
-  margin-right: 35px;
 }
 
 .chart-panel ul {
@@ -616,16 +630,14 @@ h2.my-restaurant {
   top: 191px;
 }
 
-.business-report .business {
-  cursor: default !important;
-}
+
 
 .business-report .data-disclaimer {
-  position: absolute;
-  top: 25px;
-  left: 500px;
   font-style: italic;
   font-size: 1.1em;
+  width: 250px;
+  float: right;
+  margin: 35px 154px 0 0;
 }
 
 #tab-sentiment, #tab-ratings {

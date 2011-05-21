@@ -20,11 +20,13 @@ import java.util.*;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
+import static com.google.common.collect.Collections2.filter;
 import static play.libs.Codec.decodeBASE64;
 
 public class TwitterService implements ReviewFetcher {
     private boolean isStreaming = false;
     private int maxReviews = -1;
+    private long minDate = -1;
 
     private static Configuration getTwitterConfiguration() {
         Properties conf = Play.configuration;
@@ -38,6 +40,11 @@ public class TwitterService implements ReviewFetcher {
                 .setPrettyDebugEnabled(true)
                 .setDebugEnabled(true)
                 .build();
+    }
+
+    public TwitterService setReviewMinDate(long minDate) {
+        this.minDate = minDate;
+        return this;
     }
 
     public TwitterService setMaxReviews(int maxReviews) {
@@ -54,17 +61,32 @@ public class TwitterService implements ReviewFetcher {
     public List<Review> getReviews(@Nonnull Business business) {
         if (isStreaming) {
             return getReviewsStreaming(business);
+        } else if (minDate > 0) {
+            return getReviewsMoreRecentThanDate(new Date(this.minDate), business);
         } else {
             String cacheKey = "twitter_reviews_" + business.id + "_" + maxReviews;
             Logger.info("Cache key: %s", cacheKey);
             @SuppressWarnings("unchecked")
-            List<Review> reviews = Cache.get(cacheKey, List.class);
+            List<Review> reviews = null; //Cache.get(cacheKey, List.class);
             if (reviews == null) {
                 reviews = getReviewsActual(business);
-                Cache.set(cacheKey, reviews);
             }
             return reviews;
         }
+    }
+
+    private List<Review> getReviewsMoreRecentThanDate(Date minDate, @Nonnull Business business) {
+        List<Review> reviews = new ArrayList<Review>();
+
+        int numTries = 0;
+        while ((numTries++ < 30) && (reviews = new ArrayList<Review>(filter(getReviewsActual(business), new IsDateRecent(minDate)))).size() == 0) {
+            try {
+                Thread.sleep(2000);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
+        return reviews;
     }
 
     private List<Review> getReviewsStreaming(@Nonnull Business business) {
@@ -96,12 +118,11 @@ public class TwitterService implements ReviewFetcher {
         if (business.name == null) {
             return null;
         }
-        boolean lookupDistance = business.latitude != null && business.longitude != null;
-
         List<Review> reviews = new ArrayList<Review>();
         Twitter twitter = new TwitterFactory(getTwitterConfiguration()).getInstance();
         try {
             Query query = new Query(business.name + randomSpaces());
+            query.setLang("en");
             QueryResult result = twitter.search(query);
             for (Tweet tweet : result.getTweets()) {
                 GeoLocation loc = tweet.getGeoLocation();
@@ -118,7 +139,6 @@ public class TwitterService implements ReviewFetcher {
             Logger.error("Twitter failed!: %s", e);
             Logger.error(e, "Could not search twitter.");
         }
-        Logger.info("MaxReviews: %s", maxReviews);
         if (maxReviews > 0 && reviews.size() > maxReviews) {
             Collections.shuffle(reviews);
             reviews = new ArrayList<Review>(reviews.subList(0, maxReviews));
@@ -126,22 +146,11 @@ public class TwitterService implements ReviewFetcher {
         return reviews;
     }
 
-    public class IsDateRecent implements Predicate<Review> {
-        private Date lastMessageDate;
-
-        private IsDateRecent(Date lastMessageDate) {
-            this.lastMessageDate = lastMessageDate;
-        }
-
-        @Override
-        public boolean apply(@Nullable Review review) {
-            return review != null && review.date != null && lastMessageDate.compareTo(review.date) < 0;
-        }
-    }
 
     public class BusinessStatusListener implements StatusListener {
         private CountDownLatch latch;
         private List<Status> statuses;
+        private long exceptionWait = 4;
 
         public BusinessStatusListener() {
             latch = new CountDownLatch(1);
@@ -188,9 +197,21 @@ public class TwitterService implements ReviewFetcher {
 
         @Override
         public void onException(Exception e) {
-            latch.countDown();
-            latch.countDown();
-            e.printStackTrace();
+            Logger.error(e, "Exception with twitter stream");
+            Logger.error("Error with twitter stream: %s", e);
+            if (exceptionWait < 1024) {
+                try {
+                    Logger.info("Waiting %s seconds in twitter stream.", exceptionWait);
+                    Thread.sleep(1000L * exceptionWait);
+                } catch (InterruptedException e1) {
+                    Logger.info("Somehow our thread got interrupted: %s", e);
+                }
+                exceptionWait <<= 1;
+            } else {
+                latch.countDown();
+                latch.countDown();
+            }
+
         }
     }
 

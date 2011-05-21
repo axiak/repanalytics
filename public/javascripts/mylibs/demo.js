@@ -129,7 +129,7 @@ Demo.showBusinessInfo = function (id) {
  */
 Demo.demoInfo = function (response) {
   Demo.$results.html('');
-  $("#business-report").tmpl(response[0].business).appendTo(Demo.$results);
+  $("#business-report").tmpl([response[0].business]).appendTo(Demo.$results);
   $("#review-tmpl").tmpl(response).appendTo("table.business-reviews tbody:first");
   $("div.chart-tabs").tabs();
   $("h2.subtitle")
@@ -144,10 +144,8 @@ Demo.demoInfo = function (response) {
         Demo.drawRatingPie(response);
       }
   );
-  $("footer").hide();
   if (Demo.$results.height() > 450) {
     Demo.originalDocHeight = $("#doc2").height();
-    $("#doc2").height(Demo.$results.height() + 300);
   }
   if (Modernizr.history) {
     history.pushState(null, null, "/demo/info/" + response[0].business.id + "/");
@@ -169,6 +167,9 @@ Demo.liveFeed = function (id, lastTime) {
                feedMaxSize: Demo.feedMaxSize},
         success: function (data) {
           return Demo.liveFeedCallback(data, id, lastTime);
+        },
+        error: function () {
+          setTimeout(function() {Demo.liveFeed(id, lastTime)}, 5000);
         }
         });
 };
@@ -176,51 +177,66 @@ Demo.liveFeed = function (id, lastTime) {
 Demo.liveFeedCallback = function (serverResponse, id, lastTime) {
   var currentRows = Demo.$feedBody.children();
   var totalLength = serverResponse.length + currentRows.length;
-
-
   var currentWait = 0;
-  for (var i = serverResponse.length - 1; i >= 0; i--) {
-    var item = [serverResponse[i]];
-    item[0].id = Math.round(Math.random() * 10000);
-    $("#feed-item-tmpl").tmpl(item).prependTo(Demo.$feedBody);
-    setTimeout((function (id) {
-      return function () {
-        if ($(".feed-item:visible").length >= Demo.feedMaxSize) {
-          $(".feed-item:last").fadeOut("slow");
-        }
-        var $this = $("#review-" + id).fadeIn("slow").find(".emote:first");
-        var stats = Demo.$feedStats;
-        if ($this.hasClass("happy")) {
-          stats[0] ++;
-        } else if ($this.hasClass("neutral")) {
-          stats[1] ++;
-        } else {
-          stats[2] ++;
-        }
-        var total = stats[0] + stats[1] + stats[2];
-        var percent = (stats[0] / (total));
-        percent = Math.round(percent * 10000) / 100;
-        Demo.$feedAggregate.text("" + total + " total: " + stats[2] + " bad, " + stats[1] + " neutral, " + stats[0] + " good: " + percent + "% good");
-      }})(item[0].id), currentWait);
-    currentWait += 2500;
+
+  if (lastTime != 0) {
+    currentWait = 2500;
   }
 
   if (serverResponse.length > 0) {
     lastTime = serverResponse[0].date;
   }
-  Demo.liveFeed(id, lastTime);
+
+  for (var i = serverResponse.length - 1; i >= 0; i--) {
+    var item = [serverResponse[i]];
+    setTimeout(Demo.displayTwitterItem(serverResponse[i], i === 0, id, lastTime),
+               currentWait);
+    currentWait += 2500;
+  }
+
+  if (serverResponse.length === 0) {
+    setTimeout(function () {Demo.liveFeed(id, lastTime);}, 1000);
+  }
 };
 
+Demo.displayTwitterItem = function (item, isLast, businessId, lastTime) { return function () {
+  item = [item];
+  var itemId = item[0].id = Math.round(Math.random() * 10000);
+
+  $("#feed-item-tmpl").tmpl(item).prependTo(Demo.$feedBody);
+
+  if ($(".feed-item:visible").length >= Demo.feedMaxSize) {
+    $(".feed-item:visible:last").fadeOut("slow");
+  }
+
+  var $this = $("#review-" + itemId).fadeIn("slow").find(".emote:first");
+  var stats = Demo.$feedStats;
+  if ($this.hasClass("happy")) {
+    stats[0] ++;
+  } else if ($this.hasClass("neutral")) {
+    stats[1] ++;
+  } else {
+    stats[2] ++;
+  }
+  var total = stats[0] + stats[1] + stats[2];
+  var percent = (stats[0] / (total));
+  percent = Math.round(percent * 10000) / 100;
+  Demo.$feedAggregate.text("" + total + " total: " + stats[2] + " bad, " + stats[1] + " neutral, " + stats[0] + " good: " + percent + "% good");
+  if (isLast) {
+    Demo.liveFeed(businessId, lastTime);
+  }
+}};
+
 Demo.isSad = function (rating) {
-  return rating < 2;
+  return rating < 0;
 };
 
 Demo.isNeutral = function (rating) {
-  return rating < 4;
+  return rating == 0;
 };
 
 Demo.isHappy = function (rating) {
-  return rating >= 4;
+  return rating > 0;
 };
 
 

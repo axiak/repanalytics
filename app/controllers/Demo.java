@@ -2,18 +2,13 @@ package controllers;
 
 import bootstrap.JmxInitialization;
 import com.google.common.base.Predicate;
-import com.google.common.base.Strings;
-import com.google.common.collect.Collections2;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
 import com.maxmind.geoip.Location;
-import com.maxmind.geoip.LookupService;
 import models.businesses.Business;
 import models.businesses.BusinessChain;
 import models.businesses.Review;
-import models.businesses.YelpBusiness;
-import play.Logger;
 import play.Play;
 import play.cache.Cache;
 import play.libs.F;
@@ -117,12 +112,14 @@ public class Demo extends Controller {
         Integer maxReviews = request.params.get("feedMaxSize", Integer.class);
         TwitterService twitterService = new TwitterService();
         if (lastDate != 0) {
-            twitterService.setIsStreaming(true);
+            //twitterService.setIsStreaming(true);
+            twitterService.setReviewMinDate(lastDate);
         }
         twitterService.setMaxReviews(maxReviews);
         Business business = getBusinessById(id);
         ReviewFinderService service = new ReviewFinderService(twitterService, business);
         List<Review> reviews = await(service.now()).get(business);
+        Collections.sort(reviews);
         Gson pollGson = new GsonBuilder()
                 .registerTypeAdapter(Date.class, new TimestampGsonSerializer())
                 .excludeFieldsWithoutExposeAnnotation()
@@ -167,7 +164,8 @@ public class Demo extends Controller {
     }
 
     public static void trainModel() {
-        trainClassifier();
+        trainClassifier(new File("/tmp/data"),
+                        new File(new File(Play.applicationPath, "dat"), "en-classifier.bin"));
         renderText("Success!");
     }
 }

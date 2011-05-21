@@ -12,10 +12,14 @@ GET     /get-notified/                          Simple.notready
 GET     /demo/info/{id}/                        Demo.demoInformation
 GET     /demo/poll/                             Demo.pollTwitterInfo
 
+
+
 # Registration
 POST    /notification/email/                    Registration.registerEmail
 
-GET     /train-model/                           Demo.trainModel
+# Disabled in production...
+#GET     /train-model/                           Demo.trainModel
+#GET     /offline/twitter/                       OfflineJobs.getTwitterInfo
 
 # Map static resources from the /app/public folder to the /public path
 GET     /public/                                staticDir:public

@@ -16,6 +16,8 @@ import opennlp.tools.util.ObjectStream;
 import play.Logger;
 import play.Play;
 import play.libs.F;
+import service.ReviewSource;
+import twitter4j.Twitter;
 
 import javax.annotation.Nonnull;
 import java.io.*;
@@ -25,6 +27,8 @@ import java.util.*;
 public class NaturalLanguages {
     private static TokenizerModel model = null;
     private static DoccatModel categorizationModel = null;
+    private static DoccatModel twitterCategorizationModel = null;
+
 
     private static void initializeTokenizeModel() {
         if (model == null) {
@@ -46,6 +50,14 @@ public class NaturalLanguages {
                 Logger.error(e, "Could not open classifier model");
             }
         }
+        if (twitterCategorizationModel == null) {
+            try {
+                InputStream modelIn = new FileInputStream(new File(new File(Play.applicationPath, "dat"), "en-classifier-twitter.bin").getAbsolutePath());
+                twitterCategorizationModel = new DoccatModel(modelIn);
+            } catch (IOException e) {
+                Logger.error(e, "Could not open classifier model");
+            }
+        }
     }
 
     public static String[] tokenizeString(String input) {
@@ -59,7 +71,12 @@ public class NaturalLanguages {
             return;
         }
         initializeCategorizationModel();
-        DocumentCategorizer categorizer = new DocumentCategorizerME(categorizationModel);
+        DocumentCategorizer categorizer;
+        if (review.source == ReviewSource.TWITTER) {
+            categorizer = new DocumentCategorizerME(twitterCategorizationModel);
+        } else {
+            categorizer = new DocumentCategorizerME(categorizationModel);
+        }
         double[] categorization = categorizer.categorize(tokenizeString(review.text));
         int sentimentRating = Integer.valueOf(categorizer.getBestCategory(categorization));
         if (review.rating == null) {
@@ -77,10 +94,11 @@ public class NaturalLanguages {
         review.sentiment = average - 1;
     }
 
-    public static void trainClassifier() {
+    public static void trainClassifier(File inputFile, File outputFile) {
+        assert(inputFile.exists());
         StringBuilder b = new StringBuilder();
         try {
-            BufferedReader bis = new BufferedReader(new FileReader(new File("/tmp/data")));
+            BufferedReader bis = new BufferedReader(new FileReader(inputFile));
             String line;
             while ((line = bis.readLine()) != null) {
                 b.append(line);
@@ -90,6 +108,7 @@ public class NaturalLanguages {
         }
         Gson g = new GsonBuilder().registerTypeAdapter(F.Tuple.class, new TupleInstanceCreator()).create();
         List<F.Tuple<Integer, String>> data = g.fromJson(b.toString(), new TypeToken<List<F.Tuple < Integer, String >>> (){}.getType());
+        Logger.info("Data: %s", b.toString());
         List<DocumentSample> samples = new ArrayList<DocumentSample>();
         for (F.Tuple<Integer, String> datum : data) {
             samples.add(new DocumentSample(String.valueOf(datum._1), tokenizeString(datum._2)));
@@ -116,8 +135,7 @@ public class NaturalLanguages {
         }
         BufferedOutputStream out = null;
         try {
-            out = new BufferedOutputStream(new FileOutputStream(
-                    new File(new File(Play.applicationPath, "dat"), "en-classifier.bin")));
+            out = new BufferedOutputStream(new FileOutputStream(outputFile));
             assert model != null;
             model.serialize(out);
         } catch (FileNotFoundException e) {
@@ -131,8 +149,6 @@ public class NaturalLanguages {
                 }
             }
         }
-
-        //Logger.info("Data: %s", blah);
     }
 
 
