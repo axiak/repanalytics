@@ -8,6 +8,7 @@ import play.jobs.Job;
 import play.jobs.OnApplicationStart;
 
 import javax.management.MBeanServer;
+import javax.management.MBeanServerFactory;
 import javax.management.remote.JMXConnectorServer;
 import javax.management.remote.JMXConnectorServerFactory;
 import javax.management.remote.JMXServiceURL;
@@ -17,16 +18,28 @@ import java.net.MalformedURLException;
 import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.util.Map;
+import java.util.concurrent.Semaphore;
 
 //@OnApplicationStart
-public class JmxInitialization extends Job {
+public final class JmxInitialization extends Job {
     private static JMXConnectorServer jmxServer = null;
+    private static Semaphore lock = new Semaphore(1);
 
     public void doJob() {
         if (jmxServer != null) {
             return;
         }
+        try {
+            lock.acquire();
+            initializeJmxServer();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        } finally {
+            lock.release();
+        }
+    }
 
+    private void initializeJmxServer() {
         int port = Integer.valueOf(System.getProperty("jmx.port", "8280"));
 
         String accessFile = System.getProperty("com.sun.management.jmxremote.access.file");
