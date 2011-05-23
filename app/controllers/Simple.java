@@ -11,10 +11,12 @@ public class Simple extends Controller {
     }
 
     public static void index() {
+        initializeJmx();
         render();
     }
 
     public static void notready() {
+        initializeJmx();
         render();
     }
 }

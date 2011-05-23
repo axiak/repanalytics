@@ -46,6 +46,7 @@ public class Demo extends Controller {
     }
 
     public static void index() {
+        initializeJmx();
         Location l = getRequestLocation(request);
         renderArgs.put("states", STATE_CODES);
         renderArgs.put("currentState", l.region);
@@ -53,6 +54,7 @@ public class Demo extends Controller {
     }
 
     public static void name(String term) {
+        initializeJmx();
         String cacheKey = "name_l_" + hexMD5(term);
         @SuppressWarnings("unchecked")
         List<String> results = Cache.get(cacheKey, List.class);
@@ -68,7 +70,7 @@ public class Demo extends Controller {
     }
 
     public static void search() {
-
+        initializeJmx();
         for (String param : Arrays.asList("name", "city", "address", "state", "phone")) {
             if (request.params.get(param) == null) {
                 redirect("/demo/");
