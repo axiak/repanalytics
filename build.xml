@@ -27,6 +27,8 @@ Or with PLAY_PATH environment variable:
     <property name="deployment.base" value="${platform.home}/${version}/${tomcat.instance.name}"/>
 
     <target name="war" depends="clean">
+        <move file="./conf/log4j.properties" tofile="./conf/log4j.properties.play.bak" />
+        <copy file="./conf/log4j.properties.war" tofile="./conf/log4j.properties" />
         <delete dir="./out" />
         <delete dir="${dist.dir}" />
         <mkdir dir="${dist.dir}" />
@@ -54,6 +56,7 @@ Or with PLAY_PATH environment variable:
             <exclude name="**/*.java"/>
           </fileset>
         </war>
+        <move tofile="./conf/log4j.properties" file="./conf/log4j.properties.play.bak" />
     </target>
 
     <target name="tomcat-stop">

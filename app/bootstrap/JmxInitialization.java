@@ -19,24 +19,21 @@ import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.util.Map;
 import java.util.concurrent.Semaphore;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 //@OnApplicationStart
 public final class JmxInitialization extends Job {
     private static JMXConnectorServer jmxServer = null;
-    private static Semaphore lock = new Semaphore(1);
+    private static AtomicBoolean alreadyComputing = new AtomicBoolean(false);
 
     public void doJob() {
         if (jmxServer != null) {
             return;
         }
-        try {
-            lock.acquire();
-            initializeJmxServer();
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        } finally {
-            lock.release();
+        if (alreadyComputing.getAndSet(true)) {
+            return;
         }
+        initializeJmxServer();
     }
 
     private void initializeJmxServer() {
@@ -58,7 +55,7 @@ public final class JmxInitialization extends Job {
 
         Map<String, String> jmxParameters = ImmutableMap.of("jmx.remote.x.access.file", accessFile,
                                                             "jmx.remote.x.password.file", passwordFile);
-        Logger.debug("Jmx Parameters: %s", jmxParameters);
+        Logger.info("Jmx Parameters: %s", jmxParameters);
         try {
             LocateRegistry.createRegistry(port);
             JMXServiceURL url = new JMXServiceURL(String.format(
