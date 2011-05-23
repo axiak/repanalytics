@@ -20,7 +20,7 @@ import java.util.Date;
 import java.util.List;
 
 public class DemoStreamWebSocket extends WebSocketController {
-    public static RealtimeReviewFetcher reviewFetcher = new TwitterRealtimeFetcher();
+    public static RealtimeReviewFetcher reviewFetcher = TwitterRealtimeFetcher.getInstance();
 
     public static void getReviewStream(String id) {
         Logger.info("Initiating web socket request...");

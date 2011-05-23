@@ -8,7 +8,7 @@ import javax.annotation.Nonnull;
 import java.util.List;
 
 public interface RealtimeReviewFetcher {
-    public void startBusiness(@Nonnull Business business);
+    public F.Promise<List<Review>> startBusiness(@Nonnull Business business);
     public F.Promise<List<Review>> getReviewsOnReady(@Nonnull Business business);
     public void cancelPromise(@Nonnull Business business);
     public void shutdown(@Nonnull Business business);

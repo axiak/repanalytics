@@ -3,123 +3,215 @@ package service.twitter;
 import models.businesses.Business;
 import models.businesses.Review;
 import org.apache.commons.collections.buffer.CircularFifoBuffer;
-import play.Logger;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.hibernate.util.LRUMap;
+import play.Play;
 import play.libs.F;
 import service.ReviewSource;
 import service.reviews.RealtimeReviewFetcher;
-import sun.reflect.generics.tree.VoidDescriptor;
 import twitter4j.*;
 
 import javax.annotation.Nonnull;
-import java.sql.Time;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.*;
-import java.util.concurrent.atomic.AtomicInteger;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicReference;
 
-import static play.libs.Time.*;
 import static service.twitter.TwitterService.getTwitterConfiguration;
-import static util.NaturalLanguages.reviewSentiment;
+import static util.Strings.normalizeSimple;
 
-public class TwitterRealtimeFetcher implements RealtimeReviewFetcher {
-    private Map<String, BusinessStatusListener> listeners;
-    private ConcurrentMap<String, AtomicInteger> listenerRefCounters;
-    private ConcurrentMap<String, AtomicInteger> promiseRefCounters;
+public final class TwitterRealtimeFetcher implements RealtimeReviewFetcher, StatusListener {
+    private Log logger = LogFactory.getLog(getClass());
+    private AtomicReference<TwitterStream> stream = new AtomicReference<TwitterStream>(null);
+    private transient long exceptionWaitTime = 4L;
+    private static final long maxExceptionWaitTime = 2048;
+    private final Map<String, BusinessListener> listenerMap;
+    private transient String[] filterKeywords = new String[]{};
 
-    public TwitterRealtimeFetcher() {
-        listeners = new ConcurrentHashMap<String, BusinessStatusListener>();
-        listenerRefCounters = new ConcurrentHashMap<String, AtomicInteger>();
-        promiseRefCounters = new ConcurrentHashMap<String, AtomicInteger>();
+    private static AtomicReference<TwitterRealtimeFetcher> instance = new AtomicReference<TwitterRealtimeFetcher>(null);
+
+    @SuppressWarnings("unchecked")
+    private TwitterRealtimeFetcher() {
+        int maxKeywords = Integer.valueOf(Play.configuration.getProperty("twitter.max.simultaneous.keywords", "400"));
+        listenerMap = Collections.synchronizedMap(new LRUMap(maxKeywords));
     }
 
-    public void cleanOldBusinesses(String timeout) {
-        long millisAge = parseDuration(timeout) * 1000;
-        for (Map.Entry<String, BusinessStatusListener> entry : listeners.entrySet()) {
-            if (entry.getValue().getAgeInMillis() > millisAge) {
-                Logger.info("Removing twitter stream since it's %s seconds old: '%s'",
-                            millisAge / 1000, entry.getKey());
-                entry.getValue().getTwitterStream().shutdown();
-                listeners.remove(entry.getKey());
-                listenerRefCounters.remove(entry.getKey());
-                promiseRefCounters.remove(entry.getKey());
-            }
+    public static TwitterRealtimeFetcher getInstance() {
+        TwitterRealtimeFetcher newInstance = new TwitterRealtimeFetcher();
+        if (!instance.compareAndSet(null, newInstance)) {
+            newInstance = instance.get();
         }
+        return newInstance;
     }
 
     @Override
-    public void startBusiness(@Nonnull Business business) {
-        AtomicInteger value = new AtomicInteger(1);
-        value = listenerRefCounters.putIfAbsent(business.name, value);
-        if (value == null || value.getAndIncrement() == 0) {
-            startBusinessWithReturn(business);
+    public F.Promise<List<Review>> startBusiness(@Nonnull Business business) {
+        String name = normalizeSimple(business.name);
+        BusinessListener listener = new BusinessListener(business);
+        synchronized (listenerMap) {
+            if (!listenerMap.containsKey(name)) {
+                listenerMap.put(name, listener);
+                reconnectTwitterStream();
+            } else {
+                listener = listenerMap.get(name);
+            }
         }
-    }
-
-    private BusinessStatusListener startBusinessWithReturn(@Nonnull Business business) {
-        TwitterStream twitterStream = new TwitterStreamFactory(getTwitterConfiguration()).getInstance();
-        BusinessStatusListener businessStatusListener = new BusinessStatusListener(twitterStream, business, this);
-        twitterStream.addListener(businessStatusListener);
-        twitterStream.filter(new FilterQuery().track(new String[]{business.name}));
-        listeners.put(business.name, businessStatusListener);
-        return businessStatusListener;
+        return listener.getPromise();
     }
 
     @Override
     public F.Promise<List<Review>> getReviewsOnReady(@Nonnull Business business) {
-        BusinessStatusListener listener = listeners.get(business.name);
-        if (listener == null) {
-            listener = startBusinessWithReturn(business);
+        String name = normalizeSimple(business.name);
+        try {
+            return listenerMap.get(name).getPromise();
+        } catch (NullPointerException e) {
+            return startBusiness(business);
         }
-        AtomicInteger value = new AtomicInteger(1);
-        value = promiseRefCounters.putIfAbsent(business.name, value);
-        if (value != null) {
-            value.incrementAndGet();
-        }
-        return listener.getReviewPromise();
     }
 
     @Override
     public void cancelPromise(@Nonnull Business business) {
-        if (promiseRefCounters.get(business.name).decrementAndGet() == 0) {
-            promiseRefCounters.remove(business.name);
-            listeners.get(business.name).cancelPromise();
-        }
+        String name = normalizeSimple(business.name);
+        BusinessListener listener = listenerMap.get(name);
+        // todo - maybe more ref counting logic here?
     }
 
     @Override
     public void shutdown(@Nonnull Business business) {
-        if (listenerRefCounters.get(business.name).decrementAndGet() == 0) {
-            BusinessStatusListener listener = listeners.remove(business.name);
-            if (listener != null) {
-                listener.getTwitterStream().shutdown();
-            }
-            listenerRefCounters.remove(business.name);
+        String name = normalizeSimple(business.name);
+        if (listenerMap.remove(name) != null) {
+            reconnectTwitterStream();
         }
     }
 
-    private static class BusinessStatusListener implements StatusListener {
-        /* Buffer will not hold more than 8 elements */
-        private AtomicReference<CircularFifoBuffer> buffer = new AtomicReference<CircularFifoBuffer>();
-        private AtomicReference<F.Promise<List<Review>>> promise = new AtomicReference<F.Promise<List<Review>>>();
-        private long lastTouchTime = 0;
-        private TwitterRealtimeFetcher fetcher;
-        private TwitterStream twitterStream = null;
-        private long exceptionWait = 4;
-        private static final int BUFFER_SIZE = 8;
-        private Business business;
+    private synchronized void shutdownAll() {
+        TwitterStream myStream = stream.getAndSet(null);
+        myStream.shutdown();
+        for (BusinessListener listener : listenerMap.values()) {
+            listener.forceEvaluation();
+        }
+        listenerMap.clear();
+    }
 
-        public BusinessStatusListener(TwitterStream twitterStream, Business business, TwitterRealtimeFetcher fetcher) {
-            this.twitterStream = twitterStream;
+    @Override
+    public void cleanOldBusinesses(String timeout) {
+
+    }
+
+    @Override
+    public void onStatus(Status status) {
+        String normalizedText = normalizeSimple(status.getText());
+        for (BusinessListener listener : listenerMap.values()) {
+            if (listener.handleStatus(status, normalizedText)) {
+                break;
+            }
+        }
+    }
+
+    @Override
+    public void onDeletionNotice(StatusDeletionNotice statusDeletionNotice) {
+    }
+
+    @Override
+    public void onTrackLimitationNotice(int i) {
+    }
+
+    @Override
+    public void onScrubGeo(long l, long l1) {
+    }
+
+    @Override
+    public void onException(Exception e) {
+        logger.error("Failure in twitter stream.", e);
+        if (exceptionWaitTime < maxExceptionWaitTime) {
+            try {
+                logger.info(String.format("Waiting %s seconds in twitter thread.", exceptionWaitTime));
+                Thread.sleep(1000L * exceptionWaitTime);
+            } catch (InterruptedException e1) {
+                logger.info("Somehow we were interrupted while waiting.", e1);
+            }
+            exceptionWaitTime <<= 1;
+        } else {
+            logger.error("Unrecoverable twitter failure.", e);
+            shutdownAll();
+        }
+    }
+
+    private void reconnectTwitterStream() {
+        Set<String> businessNames = listenerMap.keySet();
+        logger.info(String.format("Reconnecting to twitter stream for keywords: %s", businessNames));
+        filterKeywords = businessNames.toArray(new String[businessNames.size()]);
+        TwitterStream newStream = new TwitterStreamFactory(getTwitterConfiguration()).getInstance();
+        newStream.addListener(this);
+        TwitterStream oldStream = stream.getAndSet(newStream);
+        if (oldStream != null) {
+            oldStream.shutdown();
+        }
+        newStream.filter(new FilterQuery().track(filterKeywords));
+    }
+
+
+    private final static class BusinessListener {
+        private String name;
+        private Business business;
+        private volatile long lastTouchTime;
+        private AtomicReference<F.Promise<List<Review>>> promise;
+        private AtomicReference<Collection<Review>> reviewBuffer;
+
+        @SuppressWarnings("unchecked")
+        public BusinessListener(Business business) {
+            this.name = normalizeSimple(business.name);
             this.business = business;
-            this.fetcher = fetcher;
-            getAndResetBuffer();
+            this.promise = new AtomicReference<F.Promise<List<Review>>>(null);
+            this.reviewBuffer = new AtomicReference<Collection<Review>>(new CircularFifoBuffer(8));
+            this.lastTouchTime = new Date().getTime();
         }
 
-        private CircularFifoBuffer getAndResetBuffer() {
-            return buffer.getAndSet(new CircularFifoBuffer(BUFFER_SIZE));
+        public boolean matchesStatus(String statusText) {
+            return statusText.contains(name);
+        }
+
+        public boolean handleStatus(Status status, String normalizedText) {
+            if (matchesStatus(normalizedText)) {
+                Review review = statusToReview(status);
+                addReview(review);
+                if (this.promise.get() != null) {
+                    F.Promise<List<Review>> newPromise = new F.Promise<List<Review>>();
+                    F.Promise<List<Review>> oldPromise = this.promise.getAndSet(newPromise);
+                    List<Review> reviews = getAndResetBuffer();
+                    oldPromise.invoke(reviews);
+                }
+                return true;
+            } else {
+                return false;
+            }
+        }
+
+        public Business getBusiness() {
+            return business;
+        }
+
+        public long getLastTouchTime() {
+            return lastTouchTime;
+        }
+
+        public F.Promise<List<Review>> getPromise() {
+            F.Promise<List<Review>> myPromise = new F.Promise<List<Review>>();
+            if (!promise.compareAndSet(null, myPromise)) {
+                myPromise = promise.get();
+            }
+            lastTouchTime = new Date().getTime();
+            return myPromise;
+        }
+
+        @SuppressWarnings("unchecked")
+        public List<Review> getAndResetBuffer() {
+            lastTouchTime = new Date().getTime();
+            Collection<Review> reviews = reviewBuffer.getAndSet(new CircularFifoBuffer(8));
+            return new ArrayList<Review>(reviews);
+        }
+
+        public void addReview(Review review) {
+            reviewBuffer.get().add(review);
         }
 
         private Review statusToReview(Status status) {
@@ -128,76 +220,15 @@ public class TwitterRealtimeFetcher implements RealtimeReviewFetcher {
             review.source = ReviewSource.TWITTER;
             review.userName = status.getUser().getName();
             review.sourceUrl = "http://twitter.com/intent/user?screen_name=" + review.userName;
-            review.business = business;
             review.date = status.getCreatedAt();
-            reviewSentiment(review);
+            review.business = business;
             return review;
         }
 
-        public TwitterStream getTwitterStream() {
-            return twitterStream;
-        }
-
-        public F.Promise<List<Review>> getReviewPromise() {
-            F.Promise<List<Review>> newPromise = new F.Promise<List<Review>>();
-            if (!promise.compareAndSet(null, newPromise)) {
-                newPromise = promise.get();
-            }
-            lastTouchTime = new Date().getTime();
-            return newPromise;
-        }
-
-        public void cancelPromise() {
-            promise.set(null);
-        }
-
-        public long getAgeInMillis() {
-            return new Date().getTime() - lastTouchTime;
-        }
-
-        @Override
-        public void onStatus(Status status) {
-            F.Promise<List<Review>> actualPromise = promise.getAndSet(null);
-            Review review = statusToReview(status);
-            CircularFifoBuffer currentBuffer = actualPromise == null ? buffer.get() : getAndResetBuffer();
-            synchronized (currentBuffer) {
-                currentBuffer.add(review);
-            }
-            if (actualPromise != null) {
-                @SuppressWarnings("unchecked")
-                List<Review> response = new ArrayList<Review>(currentBuffer);
-                actualPromise.invoke(response);
-                lastTouchTime = new Date().getTime();
-            }
-        }
-
-        @Override
-        public void onDeletionNotice(StatusDeletionNotice statusDeletionNotice) {
-        }
-
-        @Override
-        public void onTrackLimitationNotice(int i) {
-        }
-
-        @Override
-        public void onScrubGeo(long l, long l1) {
-        }
-
-        @Override
-        public void onException(Exception e) {
-            Logger.error(e, "Exception with twitter stream");
-            Logger.error("Error with twitter stream: %s", e);
-            if (exceptionWait < 2048) {
-                try {
-                    Logger.info("Waiting %s seconds in twitter stream.", exceptionWait);
-                    Thread.sleep(1000L * exceptionWait);
-                } catch (InterruptedException e1) {
-                    Logger.info("Somehow our thread got interrupted: %s", e);
-                }
-                exceptionWait <<= 1;
-            } else {
-                Logger.error("Unrecoverable twitter failure.");
-                fetcher.shutdown(business);
+        private void forceEvaluation() {
+            F.Promise<List<Review>> oldPromise = promise.getAndSet(null);
+            if (oldPromise != null) {
+                oldPromise.invoke(getAndResetBuffer());
             }
         }
     }

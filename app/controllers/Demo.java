@@ -38,7 +38,7 @@ import static util.Requests.getRequestLocation;
 
 public class Demo extends Controller {
     private static final String[] STATE_CODES = "AL,AK,AS,AZ,AR,CA,CO,CT,DE,DC,FM,FL,GA,GU,HI,ID,IL,IN,IA,KS,KY,LA,ME,MH,MD,MA,MI,MN,MS,MO,MT,NE,NV,NH,NJ,NM,NY,NC,ND,MP,OH,OK,OR,PW,PA,PR,RI,SC,SD,TN,TX,UT,VT,VI,VA,WA,WV,WI,WY".split(",");
-    public static RealtimeReviewFetcher reviewFetcher = new TwitterRealtimeFetcher();
+    public static RealtimeReviewFetcher reviewFetcher = TwitterRealtimeFetcher.getInstance();
 
     @Before
     public static void initializeJmx() {
