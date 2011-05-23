@@ -40,6 +40,7 @@ public final class JmxInitialization extends Job {
     }
 
     private void initializeJmxServer() {
+        Logger.error("JMX Server initialization...");
         int port = Integer.valueOf(System.getProperty("jmx.port", "8280"));
 
         String accessFile = System.getProperty("com.sun.management.jmxremote.access.file");
