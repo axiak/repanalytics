@@ -28,7 +28,7 @@ public class TwitterService implements ReviewFetcher {
     private int maxReviews = -1;
     private long minDate = -1;
 
-    private static Configuration getTwitterConfiguration() {
+    public static Configuration getTwitterConfiguration() {
         Properties conf = Play.configuration;
         return new ConfigurationBuilder()
                 .setOAuthAccessToken(conf.getProperty("twitter.oauth.accessToken"))
@@ -59,9 +59,7 @@ public class TwitterService implements ReviewFetcher {
 
     @Override
     public List<Review> getReviews(@Nonnull Business business) {
-        if (isStreaming) {
-            return getReviewsStreaming(business);
-        } else if (minDate > 0) {
+        if (minDate > 0) {
             return getReviewsMoreRecentThanDate(new Date(this.minDate), business);
         } else {
             String cacheKey = "twitter_reviews_" + business.id + "_" + maxReviews;
@@ -85,31 +83,6 @@ public class TwitterService implements ReviewFetcher {
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
-        }
-        return reviews;
-    }
-
-    private List<Review> getReviewsStreaming(@Nonnull Business business) {
-        TwitterStream twitterStream = new TwitterStreamFactory(getTwitterConfiguration()).getInstance();
-        List<Review> reviews = new ArrayList<Review>();
-        BusinessStatusListener businessStatusListener = new BusinessStatusListener();
-        twitterStream.addListener(businessStatusListener);
-        twitterStream.filter(new FilterQuery().track(new String[]{business.name}));
-        try {
-            businessStatusListener.await(5, TimeUnit.MINUTES);
-        } finally {
-            twitterStream.shutdown();
-        }
-        List<Status> statuses = businessStatusListener.getStatuses();
-        for (Status status : statuses) {
-            Review review = new Review();
-            review.text = status.getText();
-            review.source = ReviewSource.TWITTER;
-            review.userName = status.getUser().getName();
-            review.sourceUrl = "http://twitter.com/intent/user?screen_name=" + review.userName;
-            review.business = business;
-            review.date = status.getCreatedAt();
-            reviews.add(review);
         }
         return reviews;
     }
@@ -144,86 +117,6 @@ public class TwitterService implements ReviewFetcher {
             reviews = new ArrayList<Review>(reviews.subList(0, maxReviews));
         }
         return reviews;
-    }
-
-
-    public class BusinessStatusListener implements StatusListener {
-        private CountDownLatch latch;
-        private List<Status> statuses;
-        private long exceptionWait = 4;
-
-        public BusinessStatusListener() {
-            latch = new CountDownLatch(1);
-            statuses = new ArrayList<Status>();
-        }
-
-        public List<Status> getStatuses() {
-            return statuses;
-        }
-
-        public void await() {
-            try {
-                latch.await();
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-        }
-
-        public void await(long timeout, TimeUnit unit) {
-            try {
-                latch.await(timeout, unit);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-        }
-
-        @Override
-        public void onStatus(Status status) {
-            statuses.add(status);
-            latch.countDown();
-        }
-
-        @Override
-        public void onDeletionNotice(StatusDeletionNotice statusDeletionNotice) {
-        }
-
-        @Override
-        public void onTrackLimitationNotice(int i) {
-        }
-
-        @Override
-        public void onScrubGeo(long l, long l1) {
-        }
-
-        @Override
-        public void onException(Exception e) {
-            Logger.error(e, "Exception with twitter stream");
-            Logger.error("Error with twitter stream: %s", e);
-            if (exceptionWait < 1024) {
-                try {
-                    Logger.info("Waiting %s seconds in twitter stream.", exceptionWait);
-                    Thread.sleep(1000L * exceptionWait);
-                } catch (InterruptedException e1) {
-                    Logger.info("Somehow our thread got interrupted: %s", e);
-                }
-                exceptionWait <<= 1;
-            } else {
-                latch.countDown();
-                latch.countDown();
-            }
-
-        }
-    }
-
-    public class TwitterStatuses extends RuntimeException {
-        private List<Status> statuses;
-        public TwitterStatuses(List<Status> statuses) {
-            this.statuses = statuses;
-        }
-
-        public List<Status> getStatuses() {
-            return this.statuses;
-        }
     }
 
     private String randomSpaces() {

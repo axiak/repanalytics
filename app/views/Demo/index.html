@@ -171,9 +171,10 @@
   </div>
 </script>
 
-#{if id }
 <script type='text/javascript'>
   window.Demo = window.Demo || {};
+#{if id }
   Demo.showBusinessId = '${id}';
-</script>
 #{/if}
+  Demo.wsUrl = '@@{DemoStreamWebSocket.getReviewStream()}';
+</script>

@@ -12,6 +12,10 @@ Demo.$feedBody = null;
 Demo.$feedStats = [0, 0, 0];
 Demo.feedMaxSize = 8;
 
+if (!Demo.wsUrl) {
+  Demo.wsUrl = '';
+}
+
 Demo.initialize = function () {
   Demo.$results = $("#demo-results");
   Demo.$formerrors = $("#business-info-errors");
@@ -145,14 +149,21 @@ Demo.demoInfo = function (response) {
       }
   );
   if (Demo.$results.height() > 450) {
-    Demo.originalDocHeight = $("#doc2").height();
+    Demo.originalDocHeight = $ ("#doc2").height();
   }
   if (Modernizr.history) {
     history.pushState(null, null, "/demo/info/" + response[0].business.id + "/");
     $(window).bind("popstate", Demo.popstate);
   }
-
   Demo.liveFeed(response[0].business.id);
+};
+
+Demo.liveFeedWS = function (id) {
+  var socket = new WebSocket(Demo.wsUrl + "?id=" + id);
+  socket.onmessage = function (event) {
+    console.log(event.data);
+  }
+
 };
 
 Demo.liveFeed = function (id, lastTime) {
