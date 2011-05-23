@@ -13,10 +13,12 @@ import service.reviews.RealtimeReviewFetcher;
 import twitter4j.*;
 
 import javax.annotation.Nonnull;
+import java.sql.Time;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicReference;
 
 import static service.twitter.TwitterService.getTwitterConfiguration;
+import static util.NaturalLanguages.reviewSentiment;
 import static util.Strings.normalizeSimple;
 
 public final class TwitterRealtimeFetcher implements RealtimeReviewFetcher, StatusListener {
@@ -94,7 +96,21 @@ public final class TwitterRealtimeFetcher implements RealtimeReviewFetcher, Stat
 
     @Override
     public void cleanOldBusinesses(String timeout) {
+        Set<String> startStrings = listenerMap.keySet();
+        boolean changedKeywords = false;
+        long timeoutMillis = play.libs.Time.parseDuration(timeout) * 1000L;
+        long earliestTime = new Date().getTime() - timeoutMillis;
+        for (Map.Entry<String, BusinessListener> entry : listenerMap.entrySet()) {
+            if (entry.getValue().getLastTouchTime() < earliestTime) {
+                listenerMap.remove(entry.getKey());
+                logger.info(String.format("Removing twitter listener: '%s'", entry.getKey()));
+                changedKeywords = true;
+            }
+        }
 
+        if (changedKeywords && !listenerMap.keySet().equals(startStrings)) {
+            reconnectTwitterStream();
+        }
     }
 
     @Override
@@ -222,6 +238,7 @@ public final class TwitterRealtimeFetcher implements RealtimeReviewFetcher, Stat
             review.sourceUrl = "http://twitter.com/intent/user?screen_name=" + review.userName;
             review.date = status.getCreatedAt();
             review.business = business;
+            reviewSentiment(review);
             return review;
         }
 
