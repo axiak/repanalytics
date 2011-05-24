@@ -65,10 +65,11 @@ public class TwitterService implements ReviewFetcher {
             String cacheKey = "twitter_reviews_" + business.id + "_" + maxReviews;
             Logger.info("Cache key: %s", cacheKey);
             @SuppressWarnings("unchecked")
-            List<Review> reviews = null; //Cache.get(cacheKey, List.class);
+            List<Review> reviews = Cache.get(cacheKey, List.class);
             if (reviews == null) {
                 reviews = getReviewsActual(business);
             }
+            Cache.set(cacheKey, reviews, "1min");
             return reviews;
         }
     }

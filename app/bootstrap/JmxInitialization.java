@@ -12,6 +12,7 @@ import javax.management.MBeanServerFactory;
 import javax.management.remote.JMXConnectorServer;
 import javax.management.remote.JMXConnectorServerFactory;
 import javax.management.remote.JMXServiceURL;
+import java.io.File;
 import java.io.IOException;
 import java.lang.management.ManagementFactory;
 import java.net.MalformedURLException;
@@ -21,8 +22,7 @@ import java.util.Map;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-//@OnApplicationStart
-public final class JmxInitialization extends Job {
+public final class JmxInitialization extends Job<Void> {
     private static JMXConnectorServer jmxServer = null;
     private static AtomicBoolean alreadyComputing = new AtomicBoolean(false);
 
@@ -39,18 +39,11 @@ public final class JmxInitialization extends Job {
     private void initializeJmxServer() {
         int port = Integer.valueOf(System.getProperty("jmx.port", "8280"));
 
-        String accessFile = System.getProperty("com.sun.management.jmxremote.access.file");
-        String passwordFile = System.getProperty("com.sun.management.jmxremote.password.file");
+        String accessFile = System.getProperty("com.sun.management.jmxremote.access.file",
+                                               Play.getFile("conf" + File.separator + "jmxremote.access").getAbsolutePath());
+        String passwordFile = System.getProperty("com.sun.management.jmxremote.password.file",
+                                                 Play.getFile("conf" + File.separator + "jmxremote.password").getAbsolutePath());
         MBeanServer mbs = ManagementFactory.getPlatformMBeanServer();
-
-        if (accessFile == null || passwordFile == null) {
-            if (Play.mode == Play.Mode.PROD) {
-                Logger.error("Cannot start JMX: access.file and password.file are not defined!");
-            } else {
-                Logger.debug("Cannot start JMX: access.file and password.file are not defined.");
-            }
-            return;
-        }
 
         Map<String, String> jmxParameters = ImmutableMap.of("jmx.remote.x.access.file", accessFile,
                                                             "jmx.remote.x.password.file", passwordFile);

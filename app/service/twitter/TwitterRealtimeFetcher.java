@@ -13,9 +13,9 @@ import service.reviews.RealtimeReviewFetcher;
 import twitter4j.*;
 
 import javax.annotation.Nonnull;
-import java.sql.Time;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.logging.Logger;
 
 import static service.twitter.TwitterService.getTwitterConfiguration;
 import static util.NaturalLanguages.reviewSentiment;
@@ -193,8 +193,10 @@ public final class TwitterRealtimeFetcher implements RealtimeReviewFetcher, Stat
                 if (this.promise.get() != null) {
                     F.Promise<List<Review>> newPromise = new F.Promise<List<Review>>();
                     F.Promise<List<Review>> oldPromise = this.promise.getAndSet(newPromise);
-                    List<Review> reviews = getAndResetBuffer();
-                    oldPromise.invoke(reviews);
+                    if (oldPromise != null) {
+                        List<Review> reviews = getAndResetBuffer();
+                        oldPromise.invoke(reviews);
+                    }
                 }
                 return true;
             } else {
@@ -238,6 +240,9 @@ public final class TwitterRealtimeFetcher implements RealtimeReviewFetcher, Stat
             review.sourceUrl = "http://twitter.com/intent/user?screen_name=" + review.userName;
             review.date = status.getCreatedAt();
             review.business = business;
+            if (status.getPlace() != null) {
+                play.Logger.info("We got place information for a twitter status: %s: %s", status.getPlace().getCountry(), status.getPlace().getFullName());
+            }
             reviewSentiment(review);
             return review;
         }

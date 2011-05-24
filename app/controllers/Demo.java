@@ -117,22 +117,19 @@ public class Demo extends Controller {
 
         if (lastDate == 0) {
             twitterService.setReviewMinDate(lastDate);
-            twitterService.setMaxReviews(maxReviews);
+            twitterService.setMaxReviews(maxReviews == null ? 8 : maxReviews);
             ReviewFinderService service = new ReviewFinderService(twitterService, business);
             reviews = await(service.now()).get(business);
         } else {
             reviewFetcher.startBusiness(business);
-            Logger.info("awaiting reviews");
             F.Either<List<Review>, F.Timeout> result = await(F.Promise.waitEither(
                     reviewFetcher.getReviewsOnReady(business),
                     F.Timeout("1min")));
             if (result._2.isDefined()) {
                 reviews = new ArrayList<Review>();
                 reviewFetcher.cancelPromise(business);
-                Logger.info("Timed out...");
             } else {
                 reviews = result._1.get();
-                Logger.info("Got %s length...", reviews.size());
             }
         }
 
