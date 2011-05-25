@@ -21,7 +21,7 @@ Or with PLAY_PATH environment variable:
     <property name="war.file" value="${dist.dir}/ROOT.war" />
 
     <property name="play.antify.path" value="${play.path}/modules/antify-1.0"/>
-    <property name="test.start.delay" value="25"/>
+    <property name="test.start.delay" value="35"/>
     <import file="${play.antify.path}/application-build.xml"/>
 
     <property name="deployment.base" value="${platform.home}/${version}/${tomcat.instance.name}"/>
