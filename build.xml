@@ -107,6 +107,7 @@ Or with PLAY_PATH environment variable:
               failonerror="true"
               output="report.sc">
             <arg value="--duplicates"/>
+            <arg value="--wide"/>
             <arg value="--details"/>
             <arg value="--addlangall"/>
             <arg value="--datadir"/>
