@@ -1,3 +1,6 @@
+.slocdata/*
+report.sc
+docs/
 cobertura.ser
 test-result/
 logs/

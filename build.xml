@@ -19,6 +19,7 @@ Or with PLAY_PATH environment variable:
     <property name="play.path" value="${play.default.path}"/>
     <property name="war.dir" value="${java.io.tmpdir}/_repmanage"/>
     <property name="war.file" value="${dist.dir}/ROOT.war" />
+    <property name="doc.dir" value="./docs"/>
 
     <property name="play.antify.path" value="${play.path}/modules/antify-1.0"/>
     <property name="test.start.delay" value="35"/>
@@ -94,4 +95,23 @@ Or with PLAY_PATH environment variable:
     </target>
 
     <target name="build-and-deploy" depends="war,deploy-war" />
+
+    <target name="javadoc">
+        <javadoc access="protected" destdir="${doc.dir}" sourcepath="./app">
+            <doctitle><![CDATA[<h1>CrunchTime! Information Systems</h1> - Reputation Analyzer Docs]]></doctitle>
+        </javadoc>
+    </target>
+
+    <target name="sloccount">
+        <exec executable="sloccount"
+              failonerror="true"
+              output="report.sc">
+            <arg value="--duplicates"/>
+            <arg value="--details"/>
+            <arg value="--addlangall"/>
+            <arg value="--datadir"/>
+            <arg value=".slocdata"/>
+            <arg value="./app"/>
+        </exec>
+    </target>
 </project>
