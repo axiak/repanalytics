@@ -28,6 +28,19 @@ Or with PLAY_PATH environment variable:
 
     <property name="deployment.base" value="${platform.home}/${version}/${tomcat.instance.name}"/>
 
+    <path id="all.lib.classpath">
+        <fileset dir="lib">
+            <include name="**/*.jar"/>
+        </fileset>
+        <fileset dir="${play.path}/framework/lib">
+            <include name="**/*.jar"/>
+        </fileset>
+        <fileset dir="${play.path}/framework">
+            <include name="*.jar"/>
+        </fileset>
+    </path>
+
+
     <target name="make-war-dir" depends="clean">
         <move file="./conf/log4j.properties" tofile="./conf/log4j.properties.play.bak" />
         <copy file="./conf/log4j.properties.war" tofile="./conf/log4j.properties" />
@@ -101,8 +114,10 @@ Or with PLAY_PATH environment variable:
 
     <target name="build-and-deploy" depends="war,deploy-war" />
 
+    
+
     <target name="javadoc">
-        <javadoc access="protected" destdir="${doc.dir}" sourcepath="./app">
+        <javadoc access="protected" destdir="${doc.dir}" sourcepath="./app" classpathref="all.lib.classpath">
             <doctitle><![CDATA[<h1>CrunchTime! Information Systems</h1> - Reputation Analyzer Docs]]></doctitle>
         </javadoc>
     </target>
