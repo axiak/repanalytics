@@ -15,6 +15,7 @@ Or with PLAY_PATH environment variable:
     <condition property="play.path" value="${env.PLAY_PATH}">
         <isset property="env.PLAY_PATH"/>
     </condition>
+    <property name="target.dir" value="./target"/>
     <property name="dist.dir" value="./dist" />
     <property name="play.path" value="${play.default.path}"/>
     <property name="war.dir" value="${java.io.tmpdir}/_repmanage"/>
@@ -27,7 +28,7 @@ Or with PLAY_PATH environment variable:
 
     <property name="deployment.base" value="${platform.home}/${version}/${tomcat.instance.name}"/>
 
-    <target name="war" depends="clean">
+    <target name="make-war-dir" depends="clean">
         <move file="./conf/log4j.properties" tofile="./conf/log4j.properties.play.bak" />
         <copy file="./conf/log4j.properties.war" tofile="./conf/log4j.properties" />
         <delete dir="./out" />
@@ -36,6 +37,11 @@ Or with PLAY_PATH environment variable:
         <delete dir="${war.dir}" />
         <mkdir dir="${war.dir}" />
         <play-python command="war" options=". -o ${war.dir}/ROOT" />
+        <move tofile="./conf/log4j.properties" file="./conf/log4j.properties.play.bak" />
+    </target>
+
+    <target name="war" depends="clean">
+        <antcall target="make-war-dir"/>
         <exec executable="perl" logError="true" outputProperty="dist.revision" failonerror="true">
           <arg value="bin/revision.pl" />
         </exec>
@@ -57,7 +63,6 @@ Or with PLAY_PATH environment variable:
             <exclude name="**/*.java"/>
           </fileset>
         </war>
-        <move tofile="./conf/log4j.properties" file="./conf/log4j.properties.play.bak" />
     </target>
 
     <target name="tomcat-stop">
@@ -115,4 +120,55 @@ Or with PLAY_PATH environment variable:
             <arg value="./app"/>
         </exec>
     </target>
+
+    <taskdef name="findbugs" classname="edu.umd.cs.findbugs.anttask.FindBugsTask"/>
+    <property name="findbugs.home" value="tools/findbugs" />
+    <target name="run-findbugs" depends="make-war-dir">
+        <mkdir dir="${target.dir}"/>
+        <mkdir dir="${target.dir}/rawmetrics"/>
+        <mkdir dir="${target.dir}/rawmetrics/xml"/>
+
+        <path id="war.lib.classpath">
+                <fileset dir="${war.dir}/ROOT/WEB-INF/application/lib">
+                        <include name="**/*.jar"/>
+                </fileset>
+                <fileset dir="${war.dir}/ROOT/WEB-INF/lib">
+                        <include name="**/*.jar"/>
+                </fileset>
+        </path>
+
+        <findbugs home="${findbugs.home}"
+                            timeout="1200000"
+                            jvmargs="-Xms256M -Xmx1024M"
+                            output="xml" excludefilter="tools/findbugs/excludeFilter.xml"
+                            outputFile="${target.dir}/rawmetrics/xml/findbugs.xml" >
+            <auxClasspath refid="war.lib.classpath"/>
+            <sourcePath>
+                <path >
+                    <pathelement location="./app" />
+                </path>
+            </sourcePath>
+            <class location="${war.dir}/ROOT/WEB-INF/application/precompiled/java"/>
+        </findbugs>
+    </target>
+
+
+    <path id="pmd.classpath">
+        <fileset dir="tools/pmd/lib/">
+            <include name="*.jar"/>
+        </fileset>
+    </path>
+
+    <taskdef name="pmd" classname="net.sourceforge.pmd.ant.PMDTask" classpathref="pmd.classpath"/>
+    <target name="run-pmd">
+        <mkdir dir="${target.dir}/rawmetrics"/>
+        <mkdir dir="${target.dir}/rawmetrics/xml"/>
+        <!-- other rulesets we can try naming.xml -->
+        <pmd rulesetfiles="pmd-ruleset.xml" targetjdk="1.6">
+            <formatter type="xml" toFile="${target.dir}/rawmetrics/xml/pmd.xml"/>
+            <fileset dir="./app" includes="**/*.java"/>
+        </pmd>
+    </target>
+
+
 </project>
