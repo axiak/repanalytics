@@ -5,10 +5,8 @@ import com.google.common.collect.ImmutableMap;
 import play.Logger;
 import play.Play;
 import play.jobs.Job;
-import play.jobs.OnApplicationStart;
 
 import javax.management.MBeanServer;
-import javax.management.MBeanServerFactory;
 import javax.management.remote.JMXConnectorServer;
 import javax.management.remote.JMXConnectorServerFactory;
 import javax.management.remote.JMXServiceURL;
@@ -19,7 +17,6 @@ import java.net.MalformedURLException;
 import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.util.Map;
-import java.util.concurrent.Semaphore;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 public final class JmxInitialization extends Job<Void> {
@@ -27,30 +24,25 @@ public final class JmxInitialization extends Job<Void> {
     private static AtomicBoolean alreadyComputing = new AtomicBoolean(false);
 
     public void doJob() {
-        if (jmxServer != null) {
-            return;
+        if (jmxServer == null && !alreadyComputing.getAndSet(true)) {
+            initializeJmxServer();
         }
-        if (alreadyComputing.getAndSet(true)) {
-            return;
-        }
-        initializeJmxServer();
     }
 
     private void initializeJmxServer() {
-        int port = Integer.valueOf(System.getProperty("jmx.port", "8280"));
+        final int port = Integer.valueOf(System.getProperty("jmx.port", "8280"));
 
-        String accessFile = System.getProperty("com.sun.management.jmxremote.access.file",
+        final String accessFile = System.getProperty("com.sun.management.jmxremote.access.file",
                                                Play.getFile("conf" + File.separator + "jmxremote.access").getAbsolutePath());
-        String passwordFile = System.getProperty("com.sun.management.jmxremote.password.file",
+        final String passwordFile = System.getProperty("com.sun.management.jmxremote.password.file",
                                                  Play.getFile("conf" + File.separator + "jmxremote.password").getAbsolutePath());
-        MBeanServer mbs = ManagementFactory.getPlatformMBeanServer();
+        final MBeanServer mbs = ManagementFactory.getPlatformMBeanServer();
 
-        Map<String, String> jmxParameters = ImmutableMap.of("jmx.remote.x.access.file", accessFile,
+        final Map<String, String> jmxParameters = ImmutableMap.of("jmx.remote.x.access.file", accessFile,
                                                             "jmx.remote.x.password.file", passwordFile);
-        Logger.info("Jmx Parameters: %s", jmxParameters);
         try {
             LocateRegistry.createRegistry(port);
-            JMXServiceURL url = new JMXServiceURL(String.format(
+            final JMXServiceURL url = new JMXServiceURL(String.format(
                     "service:jmx:rmi://127.0.0.1:%s/jndi/rmi://127.0.0.1:%s/jmxrmi",
                     port + 100, port));
             jmxServer = JMXConnectorServerFactory.newJMXConnectorServer(url, jmxParameters, mbs);
@@ -63,6 +55,5 @@ public final class JmxInitialization extends Job<Void> {
         } catch (IOException e) {
             Logger.error(e, "Could not start JMX server.");
         }
-
     }
 }

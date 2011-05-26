@@ -9,11 +9,11 @@ import play.mvc.Controller;
 
 import static util.Requests.getIpAddress;
 
-public class Registration extends Controller {
+public final class Registration extends Controller {
 
     public static void registerEmail() {
-        String email = request.params.get("email");
-        String numberLocationsParam = request.params.get("locations");
+        final String email = request.params.get("email");
+        final String numberLocationsParam = request.params.get("locations");
 
         int numberLocations = 0;
         if (!Strings.isNullOrEmpty(numberLocationsParam)) {
@@ -24,7 +24,7 @@ public class Registration extends Controller {
             }
         }
 
-        String name = request.params.get("name");
+        final String name = request.params.get("name");
 
         validation.email(email);
         if (validation.errorsMap().size() > 0) {
@@ -32,7 +32,7 @@ public class Registration extends Controller {
             renderJSON(ImmutableMap.<String, String>of("status", "invalid"));
         }
         try {
-            SeedUser user = new SeedUser();
+            final SeedUser user = new SeedUser();
             user.email = email;
             user.fullName = name;
             user.ipAddress = getIpAddress(request);

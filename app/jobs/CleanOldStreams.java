@@ -2,7 +2,6 @@ package jobs;
 
 
 import controllers.Demo;
-import play.Logger;
 import play.jobs.Every;
 import play.jobs.Job;
 

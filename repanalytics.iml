@@ -41,6 +41,7 @@
         </SOURCES>
       </library>
     </orderEntry>
+    <orderEntry type="library" name="pmd" level="project" />
   </component>
   <component name="org.twodividedbyzero.idea.findbugs">
     <option name="_basePreferences">

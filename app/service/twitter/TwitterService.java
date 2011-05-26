@@ -1,7 +1,6 @@
 package service.twitter;
 
 
-import com.google.common.base.Predicate;
 import models.businesses.Business;
 import models.businesses.Review;
 import org.apache.commons.lang.math.RandomUtils;
@@ -15,16 +14,12 @@ import twitter4j.conf.Configuration;
 import twitter4j.conf.ConfigurationBuilder;
 
 import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 import java.util.*;
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.TimeUnit;
 
 import static com.google.common.collect.Collections2.filter;
 import static play.libs.Codec.decodeBASE64;
 
 public class TwitterService implements ReviewFetcher {
-    private boolean isStreaming = false;
     private int maxReviews = -1;
     private long minDate = -1;
 
@@ -49,11 +44,6 @@ public class TwitterService implements ReviewFetcher {
 
     public TwitterService setMaxReviews(int maxReviews) {
         this.maxReviews = maxReviews;
-        return this;
-    }
-
-    public TwitterService setIsStreaming(boolean streaming) {
-        this.isStreaming = streaming;
         return this;
     }
 

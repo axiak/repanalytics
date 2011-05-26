@@ -9,7 +9,6 @@ import com.maxmind.geoip.Location;
 import models.businesses.Business;
 import models.businesses.BusinessChain;
 import models.businesses.Review;
-import play.Logger;
 import play.Play;
 import play.cache.Cache;
 import play.libs.F;
@@ -36,7 +35,7 @@ import static play.libs.Codec.hexMD5;
 import static util.NaturalLanguages.trainClassifier;
 import static util.Requests.getRequestLocation;
 
-public class Demo extends Controller {
+public final class Demo extends Controller {
     private static final String[] STATE_CODES = "AL,AK,AS,AZ,AR,CA,CO,CT,DE,DC,FM,FL,GA,GU,HI,ID,IL,IN,IA,KS,KY,LA,ME,MH,MD,MA,MI,MN,MS,MO,MT,NE,NV,NH,NJ,NM,NY,NC,ND,MP,OH,OK,OR,PW,PA,PR,RI,SC,SD,TN,TX,UT,VT,VI,VA,WA,WV,WI,WY".split(",");
     public static RealtimeReviewFetcher reviewFetcher = TwitterRealtimeFetcher.getInstance();
 
@@ -47,19 +46,19 @@ public class Demo extends Controller {
 
     public static void index() {
         initializeJmx();
-        Location l = getRequestLocation(request);
+        final Location location = getRequestLocation(request);
         renderArgs.put("states", STATE_CODES);
-        renderArgs.put("currentState", l.region);
+        renderArgs.put("currentState", location.region);
         render();
     }
 
-    public static void name(String term) {
+    public static void name(final String term) {
         initializeJmx();
-        String cacheKey = "name_l_" + hexMD5(term);
+        final String cacheKey = "name_l_" + hexMD5(term);
         @SuppressWarnings("unchecked")
         List<String> results = Cache.get(cacheKey, List.class);
         if (results == null) {
-            List<BusinessChain> chains = BusinessChain.find("byNameIlike", "%" + term + "%").fetch();
+            final List<BusinessChain> chains = BusinessChain.find("byNameIlike", "%" + term + "%").fetch();
             results = new ArrayList<String>(transform(chains, BusinessChain.nameGetter()));
             if (results.size() > 15) {
                 results = new ArrayList<String>();
@@ -76,9 +75,9 @@ public class Demo extends Controller {
                 redirect("/demo/");
             }
         }
-        PolyRemoteBusinessSearchBuilder rbsb = new PolyRemoteBusinessSearchBuilder(new YelpV2API(), new FacebookService());
+        final PolyRemoteBusinessSearchBuilder rbsb = new PolyRemoteBusinessSearchBuilder(new YelpV2API(), new FacebookService());
 
-        List<F.Tuple<Double, Business>> businesses = await(
+        final List<F.Tuple<Double, Business>> businesses = await(
                 rbsb
                         .name(request.params.get("name"))
                         .city(request.params.get("city"))
@@ -87,29 +86,27 @@ public class Demo extends Controller {
                         .phone(request.params.get("phone"))
                 .now());
 
-        int i=0;
+        int index = -1;
         for (F.Tuple<Double, Business> business : businesses) {
-            Business currentBusiness = business._2.addToDatabase();
-            businesses.set(i, new F.Tuple<Double, Business>(business._1, currentBusiness));
+            index++;
+            final Business currentBusiness = business._2.addToDatabase();
+            businesses.set(index, new F.Tuple<Double, Business>(business._1, currentBusiness));
             Cache.set("business_" + currentBusiness.id, currentBusiness);
-            i++;
         }
 
-        if (businesses.size() == 0) {
+        if (businesses.isEmpty()) {
             renderJSON(new F.Tuple<String, String>("notfound", ""), new TypeToken<F.Tuple<String, String>>(){}.getType());
-            return;
         }
 
         if (businesses.get(0) != null && Math.abs(businesses.get(0)._1 - 1.000) < 0.00001) {
             demoInformation(businesses.get(0)._2);
-            return;
         }
 
         renderJSON(new F.Tuple<String, List<F.Tuple<Double, Business>>>("disambiguate", businesses),
                    new TypeToken<F.Tuple<String, List<F.Tuple<Double, Business>>>>() {}.getType());
     }
 
-    public static void pollTwitterInfo(String id, long lastDate) {
+    public static void pollTwitterInfo(String id, final long lastDate) {
         Integer maxReviews = request.params.get("feedMaxSize", Integer.class);
         TwitterService twitterService = new TwitterService();
         Business business = getBusinessById(id);
@@ -159,7 +156,7 @@ public class Demo extends Controller {
         renderJSON(new GsonBuilder().setDateFormat("MM/dd/yyyy").create().toJson(reviews));
     }
 
-    static Business getBusinessById(String id) {
+    public static Business getBusinessById(String id) {
         Business business = Cache.get("business_" + id, Business.class);
         if (business == null) {
             business = Business.find("byId", Long.valueOf(id)).<Business>first();

@@ -6,11 +6,9 @@ import com.restfb.DefaultFacebookClient;
 import com.restfb.FacebookClient;
 import com.restfb.Parameter;
 import com.restfb.json.JsonObject;
-import com.restfb.types.Page;
 import com.restfb.types.Post;
 import models.businesses.Business;
 import models.businesses.Review;
-import play.Logger;
 import play.cache.Cache;
 import service.ReviewSource;
 import service.reviews.ReviewFetcher;
@@ -18,7 +16,6 @@ import service.search.PhoneBusinessSearcher;
 import service.search.RemoteBusinessFinder;
 
 import javax.annotation.Nonnull;
-import java.io.Console;
 import java.util.*;
 
 import static play.libs.Codec.hexMD5;
@@ -31,19 +28,18 @@ public class FacebookService implements RemoteBusinessFinder, ReviewFetcher, Pho
             return new ArrayList<Business>();
         }
 
-        phone = normalizePhone(phone);
-        String cacheKey = "facebook_phone_" + hexMD5(phone);
+        final String normalizedPhone = normalizePhone(phone);
+        final String cacheKey = "facebook_phone_" + hexMD5(normalizedPhone);
         @SuppressWarnings("unchecked")
         List<Business> result = Cache.get(cacheKey, List.class);
-        if (result != null) {
-            return result;
-        }
-        FacebookClient facebookClient = new DefaultFacebookClient();
+        if (result == null) {
+            FacebookClient facebookClient = new DefaultFacebookClient();
 
-        JsonObject response = facebookClient.fetchObject("search", JsonObject.class, Parameter.with("phone", phone),
-                                                          Parameter.with("type", "page"));
-        result = handlePageResponse(response);
-        Cache.set(cacheKey, result, "1440mn");
+            JsonObject response = facebookClient.fetchObject("search", JsonObject.class, Parameter.with("phone", normalizedPhone),
+                                                              Parameter.with("type", "page"));
+            result = handlePageResponse(response);
+            Cache.set(cacheKey, result, "1440mn");
+        }
         return result;
     }
 
@@ -57,7 +53,7 @@ public class FacebookService implements RemoteBusinessFinder, ReviewFetcher, Pho
             return result;
         }
 
-        FacebookClient facebookClient = new DefaultFacebookClient();
+        final FacebookClient facebookClient = new DefaultFacebookClient();
 
         JsonObject response = facebookClient.fetchObject("search", JsonObject.class, Parameter.with("q", name),
                                                           Parameter.with("type", "page"),
